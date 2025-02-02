@@ -1,0 +1,6 @@
+dist/
+bin/
+# Needed for goreleaser to work within the CI/CD Workflow
+git-cliff
+git-cliff-*
+release-notes.md
