@@ -1,0 +1,21 @@
+---
+linters:
+  enable-all: true
+  disable:
+    - "testpackage"
+    - "exhaustruct"
+    - "err113"
+    - "depguard"
+    - "funlen"
+    - "exportloopref"
+    - "dupl"
+    - "gochecknoglobals"
+linters-settings:
+  mnd:
+    ignored-numbers:
+      - "0o644"
+      - "0o755"
+      - "42"
+  goconst:
+    ignore-tests: true
+...
