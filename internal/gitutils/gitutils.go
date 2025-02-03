@@ -26,6 +26,31 @@ func getCommitTimestamp(repo *git.Repository, hash plumbing.Hash) (int64, error)
 	return commit.Committer.When.Unix(), nil
 }
 
+func GetCommitFromTag(repo *git.Repository, tagRef *plumbing.Reference) (*object.Commit, error) {
+	tagObject, err := repo.TagObject(tagRef.Hash())
+	if errors.Is(err, plumbing.ErrObjectNotFound) {
+		// Lightweight tag, points directly to a commit
+		commit, err := repo.CommitObject(tagRef.Hash())
+		if err != nil {
+			return nil, fmt.Errorf("failed to get commit object for lightweight tag %s: %w", tagRef.Name().Short(), err)
+		}
+
+		return commit, nil
+	}
+
+	if err == nil {
+		// Annotated tag, points to a tag object which points to a commit
+		commit, err := repo.CommitObject(tagObject.Target)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get commit object for annotated tag %s: %w", tagRef.Name().Short(), err)
+		}
+
+		return commit, nil
+	}
+
+	return nil, fmt.Errorf("failed to get tag object for tag %s: %w", tagRef.Name().Short(), err)
+}
+
 func GetTagsWithTimestamps(repo *git.Repository) ([]TagInfo, error) {
 	var tagsInfo []TagInfo
 
@@ -35,7 +60,7 @@ func GetTagsWithTimestamps(repo *git.Repository) ([]TagInfo, error) {
 	}
 
 	err = tagRefs.ForEach(func(tagRef *plumbing.Reference) error {
-		commit, err := repo.CommitObject(tagRef.Hash())
+		commit, err := GetCommitFromTag(repo, tagRef)
 		if err != nil {
 			return fmt.Errorf("failed to get commit object for tag %s: %w", tagRef.Name().Short(), err)
 		}
