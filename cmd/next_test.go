@@ -38,6 +38,21 @@ func TestNewNextCmd_ValidTag(t *testing.T) {
 	assert.Contains(t, output.String(), "1.0.1")
 }
 
+func TestNewNextCmd_ValidTagWithVPrefix(t *testing.T) {
+	t.Parallel()
+
+	repoDirectoryPath := "."
+	nextCmd := NewNextCmd(&MockGit{TagName: "v1.0.0", AdditionalCommits: []string{"fix: bug fix"}}, &repoDirectoryPath)
+
+	var output bytes.Buffer
+
+	nextCmd.SetOut(&output)
+	err := nextCmd.Execute()
+	require.NoError(t, err)
+
+	assert.Contains(t, output.String(), "1.0.1")
+}
+
 func TestNewNextCmd_InvalidTag(t *testing.T) {
 	t.Parallel()
 

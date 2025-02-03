@@ -18,14 +18,14 @@ func NewLatestCmd(git GitInterface, repoDirectoryPath *string) *cobra.Command {
 			if err != nil {
 				log.Fatalf("failed to open repository: %v", err)
 			}
-			tagInfo, err := gitutils.GetLatestVersionTag(repository)
+			semVer, err := gitutils.GetLatestVersion(repository)
 			if err != nil {
-				log.Warn("No version tags found")
+				log.Warn("Latest version not found")
 
 				return
 			}
 
-			fmt.Fprintln(cmd.OutOrStdout(), tagInfo.Name)
+			fmt.Fprintln(cmd.OutOrStdout(), semVer.String())
 		},
 	}
 
