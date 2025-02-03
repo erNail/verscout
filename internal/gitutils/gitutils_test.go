@@ -62,6 +62,27 @@ func createTestCommit(repo *git.Repository, message string, content string, time
 	return commitHash, nil
 }
 
+func createAnnotatedTag(
+	repo *git.Repository,
+	tagName string,
+	commitHash plumbing.Hash,
+	message string,
+) (*plumbing.Reference, error) {
+	tagHash, err := repo.CreateTag(tagName, commitHash, &git.CreateTagOptions{
+		Message: message,
+		Tagger: &object.Signature{
+			Name:  "Test Tagger",
+			Email: "tagger@test.com",
+			When:  time.Now(),
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create annotated tag: %w", err)
+	}
+
+	return tagHash, nil
+}
+
 func TestGetTagsWithTimestamps_TwoTags(t *testing.T) {
 	t.Parallel()
 
@@ -93,6 +114,23 @@ func TestGetTagsWithTimestamps_NoTags(t *testing.T) {
 	tagsInfos, err := GetTagsWithTimestamps(repo)
 	require.NoError(t, err)
 	assert.Empty(t, tagsInfos)
+}
+
+func TestGetTagsWithTimestamps_AnnotatedTag(t *testing.T) {
+	t.Parallel()
+
+	repo, err := createTestRepo()
+	require.NoError(t, err)
+	commitHash, err := createTestCommit(repo, "First commit", "Hello, World!", time.Now())
+	require.NoError(t, err)
+	_, err = createAnnotatedTag(repo, "v1.0.0", commitHash, "Annotated tag")
+	require.NoError(t, err)
+
+	tagsInfos, err := GetTagsWithTimestamps(repo)
+	require.NoError(t, err)
+	assert.Len(t, tagsInfos, 1)
+	assert.Equal(t, "v1.0.0", tagsInfos[0].Name)
+	assert.NotZero(t, tagsInfos[0].UnixTime)
 }
 
 func TestGetCommitTimestamp(t *testing.T) {
@@ -230,4 +268,34 @@ func TestGetCommitMessagesSinceCommitHash(t *testing.T) {
 	assert.Len(t, messages, 2)
 	assert.Equal(t, "Third commit", messages[0])
 	assert.Equal(t, "Second commit", messages[1])
+}
+
+func TestGetCommitFromTag_LightweightTag(t *testing.T) {
+	t.Parallel()
+
+	repo, err := createTestRepo()
+	require.NoError(t, err)
+	commitHash, err := createTestCommit(repo, "First commit", "Hello, World!", time.Now())
+	require.NoError(t, err)
+	tagRef, err := repo.CreateTag("v1.0.0", commitHash, nil)
+	require.NoError(t, err)
+
+	commit, err := GetCommitFromTag(repo, tagRef)
+	require.NoError(t, err)
+	assert.Equal(t, commitHash, commit.Hash)
+}
+
+func TestGetCommitFromTag_AnnotatedTag(t *testing.T) {
+	t.Parallel()
+
+	repo, err := createTestRepo()
+	require.NoError(t, err)
+	commitHash, err := createTestCommit(repo, "First commit", "Hello, World!", time.Now())
+	require.NoError(t, err)
+	tagRef, err := createAnnotatedTag(repo, "v1.0.0", commitHash, "Annotated tag")
+	require.NoError(t, err)
+
+	commit, err := GetCommitFromTag(repo, tagRef)
+	require.NoError(t, err)
+	assert.Equal(t, commitHash, commit.Hash)
 }
