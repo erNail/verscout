@@ -57,6 +57,9 @@ jobs:
         id: "get_version"
         run: |
           VERSION=$(go run main.go next)
+          if [ -z "$VERSION" ]; then
+            exit 0
+          fi
           if [ "${{ github.ref_name }}" != "${{ github.event.repository.default_branch }}" ]; then
             VERSION="${VERSION}-rc"
           fi
