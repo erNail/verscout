@@ -23,18 +23,20 @@ const (
 	MajorBump
 )
 
-func IsValidSemVer(semVerString string) bool {
-	semVerRegex := regexp.MustCompile(`^\d+\.\d+\.\d+$`)
+func IsValidSemVerTag(semVerString string) bool {
+	semVerRegex := regexp.MustCompile(`^v?\d+\.\d+\.\d+$`)
 
 	return semVerRegex.MatchString(semVerString)
 }
 
-func ExtractSemVerStruct(semVerString string) (*SemVer, error) {
-	if !IsValidSemVer(semVerString) {
-		return nil, fmt.Errorf("invalid semantic version: %s", semVerString)
+func ExtractSemVerStruct(versionTag string) (*SemVer, error) {
+	if !IsValidSemVerTag(versionTag) {
+		return nil, fmt.Errorf("invalid semantic version: %s", versionTag)
 	}
 
-	parts := strings.Split(semVerString, ".")
+	version := regexp.MustCompile(`\d+\.\d+\.\d+`).FindString(versionTag)
+
+	parts := strings.Split(version, ".")
 	major, _ := strconv.Atoi(parts[0])
 	minor, _ := strconv.Atoi(parts[1])
 	patch, _ := strconv.Atoi(parts[2])
@@ -50,12 +52,12 @@ func (sv *SemVer) String() string {
 	return fmt.Sprintf("%d.%d.%d", sv.Major, sv.Minor, sv.Patch)
 }
 
-func CalculateNextVersion(currentVersion string, commitMessages []string) (string, error) {
+func CalculateNextVersion(versionTag string, commitMessages []string) (string, error) {
 	if len(commitMessages) == 0 {
 		return "", errors.New("no commit messages provided")
 	}
 
-	semVer, err := ExtractSemVerStruct(currentVersion)
+	semVer, err := ExtractSemVerStruct(versionTag)
 	if err != nil {
 		return "", fmt.Errorf("failed to extract SemVer struct: %w", err)
 	}

@@ -62,7 +62,7 @@ func GetLatestVersionTag(repo *git.Repository) (*TagInfo, error) {
 	var latestTag TagInfo
 
 	for _, tag := range tags {
-		if semverutils.IsValidSemVer(tag.Name) {
+		if semverutils.IsValidSemVerTag(tag.Name) {
 			if latestTag.Name == "" || tag.UnixTime > latestTag.UnixTime {
 				latestTag = tag
 			}
@@ -76,6 +76,20 @@ func GetLatestVersionTag(repo *git.Repository) (*TagInfo, error) {
 	log.WithField("tag", latestTag.Name).Info("Found latest version tag")
 
 	return &latestTag, nil
+}
+
+func GetLatestVersion(repo *git.Repository) (*semverutils.SemVer, error) {
+	latestTag, err := GetLatestVersionTag(repo)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get latest version tag: %w", err)
+	}
+
+	semVer, err := semverutils.ExtractSemVerStruct(latestTag.Name)
+	if err != nil {
+		return nil, fmt.Errorf("failed to extract semver struct: %w", err)
+	}
+
+	return semVer, nil
 }
 
 func GetCommitsSinceCommitHash(repo *git.Repository, commitHash plumbing.Hash) ([]*object.Commit, error) {

@@ -7,21 +7,21 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestIsValidSemVer_Valid(t *testing.T) {
+func TestIsValidSemVerTag_Valid(t *testing.T) {
 	t.Parallel()
-	assert.True(t, IsValidSemVer("1.0.0"))
-	assert.True(t, IsValidSemVer("0.1.0"))
-	assert.True(t, IsValidSemVer("0.0.1"))
-	assert.True(t, IsValidSemVer("1.2.3"))
+	assert.True(t, IsValidSemVerTag("1.0.0"))
+	assert.True(t, IsValidSemVerTag("0.1.0"))
+	assert.True(t, IsValidSemVerTag("0.0.1"))
+	assert.True(t, IsValidSemVerTag("1.2.3"))
+	assert.True(t, IsValidSemVerTag("v1.2.3"))
 }
 
-func TestIsValidSemVer_Invalid(t *testing.T) {
+func TestIsValidSemVerTag_Invalid(t *testing.T) {
 	t.Parallel()
-	assert.False(t, IsValidSemVer("1.0"))
-	assert.False(t, IsValidSemVer("1.0.0.0"))
-	assert.False(t, IsValidSemVer("1.0.a"))
-	assert.False(t, IsValidSemVer("a.b.c"))
-	assert.False(t, IsValidSemVer("v1.2.3"))
+	assert.False(t, IsValidSemVerTag("1.0"))
+	assert.False(t, IsValidSemVerTag("1.0.0.0"))
+	assert.False(t, IsValidSemVerTag("1.0.a"))
+	assert.False(t, IsValidSemVerTag("a.b.c"))
 }
 
 func TestExtractSemVerStruct_Valid(t *testing.T) {
@@ -32,12 +32,12 @@ func TestExtractSemVerStruct_Valid(t *testing.T) {
 	assert.Equal(t, &SemVer{Major: 1, Minor: 2, Patch: 3}, semVer)
 }
 
-func TestExtractSemVerStruct_InvalidPrefix(t *testing.T) {
+func TestExtractSemVerStruct_VPrefix(t *testing.T) {
 	t.Parallel()
 
 	semVer, err := ExtractSemVerStruct("v1.2.3")
-	require.Error(t, err)
-	assert.Nil(t, semVer)
+	require.NoError(t, err)
+	assert.Equal(t, &SemVer{Major: 1, Minor: 2, Patch: 3}, semVer)
 }
 
 func TestExtractSemVerStruct_InvalidFormat(t *testing.T) {
