@@ -8,12 +8,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GitInterface defines the required git operations for version management.
 type GitInterface interface {
 	PlainOpen(path string) (*git.Repository, error)
 }
 
+// Git implements the GitInterface for interacting with git repositories.
 type Git struct{}
 
+// PlainOpen opens a git repository at the specified path.
 func (g *Git) PlainOpen(path string) (*git.Repository, error) {
 	repo, err := git.PlainOpen(path)
 	if err != nil {
@@ -28,9 +31,6 @@ var version = "dev"
 
 // NewRootCmd creates the root command for the CLI application.
 // This command serves as the entry point and parent for all other commands.
-//
-// Returns:
-//   - *cobra.Command: A pointer to the newly created cobra.Command.
 func NewRootCmd() *cobra.Command {
 	var repoDirectoryPath string
 
@@ -48,6 +48,7 @@ func NewRootCmd() *cobra.Command {
 	return rootCmd
 }
 
+// Execute runs the root command.
 func Execute() {
 	cmd := NewRootCmd()
 

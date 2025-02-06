@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Returns a cobra.Command that can be used as a subcommand.
 func NewLatestCmd(git GitInterface, repoDirectoryPath *string) *cobra.Command {
 	latestCmd := &cobra.Command{
 		Use:   "latest",
