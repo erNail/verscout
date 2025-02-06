@@ -20,11 +20,11 @@ func NewLatestCmd(git GitInterface, repoDirectoryPath *string) *cobra.Command {
 			}
 			semVer, err := gitutils.GetLatestVersion(repository)
 			if err != nil {
-				log.Warn("Latest version not found")
+				log.Warnf("Latest version not found: %v", err)
 
 				return
 			}
-
+			log.WithField("version", semVer.String()).Info("Found latest version")
 			fmt.Fprintln(cmd.OutOrStdout(), semVer.String())
 		},
 	}

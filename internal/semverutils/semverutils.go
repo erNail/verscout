@@ -6,6 +6,15 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
+)
+
+var (
+	ErrNoCommitsFound      = errors.New("no commits found")
+	ErrNoBump              = errors.New("no conventional commits found that affect the version")
+	ErrInvalidSemVerTag    = errors.New("invalid semantic version tag")
+	ErrInvalidCommitFormat = errors.New("invalid conventional commit format")
 )
 
 type SemVer struct {
@@ -31,7 +40,7 @@ func IsValidSemVerTag(semVerString string) bool {
 
 func ExtractSemVerStruct(versionTag string) (*SemVer, error) {
 	if !IsValidSemVerTag(versionTag) {
-		return nil, fmt.Errorf("invalid semantic version: %s", versionTag)
+		return nil, ErrInvalidSemVerTag
 	}
 
 	version := regexp.MustCompile(`\d+\.\d+\.\d+`).FindString(versionTag)
@@ -54,7 +63,7 @@ func (sv *SemVer) String() string {
 
 func CalculateNextVersion(versionTag string, commitMessages []string) (string, error) {
 	if len(commitMessages) == 0 {
-		return "", errors.New("no commit messages provided")
+		return "", ErrNoCommitsFound
 	}
 
 	semVer, err := ExtractSemVerStruct(versionTag)
@@ -64,7 +73,7 @@ func CalculateNextVersion(versionTag string, commitMessages []string) (string, e
 
 	bumpType := determineBumpType(commitMessages)
 	if bumpType == NoBump {
-		return "", errors.New("no conventional commits found that affect the version")
+		return "", ErrNoBump
 	}
 
 	nextSemVer := applyBump(*semVer, bumpType)
@@ -83,13 +92,19 @@ func determineBumpType(commitMessages []string) BumpType {
 		switch {
 		case breakingChangeRegex.MatchString(message):
 			bumpType = MajorBump
+
+			log.Info("Detected bump type: MAJOR")
 		case featRegex.MatchString(message):
 			if bumpType < MinorBump {
 				bumpType = MinorBump
+
+				log.Info("Detected bump type: MINOR")
 			}
 		case fixRegex.MatchString(message):
 			if bumpType < PatchBump {
 				bumpType = PatchBump
+
+				log.Info("Detected bump type: PATCH")
 			}
 		}
 	}

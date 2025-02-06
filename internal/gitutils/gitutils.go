@@ -11,6 +11,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var (
+	ErrNoCommitsFound     = errors.New("no commits found since given hash")
+	ErrNoValidVersionTags = errors.New("no valid version tags found")
+	ErrNoTags             = errors.New("no tags found")
+)
+
 type TagInfo struct {
 	Name     string
 	UnixTime int64
@@ -75,6 +81,10 @@ func GetTagsWithTimestamps(repo *git.Repository) ([]TagInfo, error) {
 		return nil, fmt.Errorf("failed to iterate tags: %w", err)
 	}
 
+	if len(tagsInfo) == 0 {
+		return nil, ErrNoTags
+	}
+
 	return tagsInfo, nil
 }
 
@@ -95,7 +105,7 @@ func GetLatestVersionTag(repo *git.Repository) (*TagInfo, error) {
 	}
 
 	if latestTag.Name == "" {
-		return nil, errors.New("no valid version tags found")
+		return nil, ErrNoValidVersionTags
 	}
 
 	log.WithField("tag", latestTag.Name).Info("Found latest version tag")
@@ -149,6 +159,10 @@ func GetCommitsSinceCommitHash(repo *git.Repository, commitHash plumbing.Hash) (
 		return nil, fmt.Errorf("failed to iterate commits: %w", err)
 	}
 
+	if len(commits) == 0 {
+		return nil, ErrNoCommitsFound
+	}
+
 	return commits, nil
 }
 
@@ -159,14 +173,10 @@ func GetCommitMessagesSinceCommitHash(repo *git.Repository, commitHash plumbing.
 	}
 
 	commitMessages := make([]string, 0, len(commits))
-	for _, commit := range commits {
-		commitMessages = append(commitMessages, commit.Message)
-	}
 
-	if len(commitMessages) == 0 {
-		log.Info("No commits found since the given commit hash")
-	} else {
-		log.WithField("commitMessages", commitMessages).Info("Found commits since the given commit hash")
+	for _, commit := range commits {
+		log.WithField("commitMessage", commit.Message).Info("Found commit message")
+		commitMessages = append(commitMessages, commit.Message)
 	}
 
 	return commitMessages, nil
