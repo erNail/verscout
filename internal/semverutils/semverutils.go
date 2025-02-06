@@ -63,7 +63,8 @@ func ExtractSemVerStruct(versionTag string) (*SemVer, error) {
 }
 
 // String returns the string representation of a SemVer in the format X.Y.Z.
-	return fmt.Sprintf("%d.%d.%d", sv.Major, sv.Minor, sv.Patch)
+func (semVer *SemVer) String() string {
+	return fmt.Sprintf("%d.%d.%d", semVer.Major, semVer.Minor, semVer.Patch)
 }
 
 // CalculateNextVersion determines the next semantic version based on the current version
