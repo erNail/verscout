@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/erNail/verscout/internal/gitutils"
@@ -21,21 +22,31 @@ func NewNextCmd(git GitInterface, repoDirectoryPath *string) *cobra.Command {
 			}
 			tagInfo, err := gitutils.GetLatestVersionTag(repository)
 			if err != nil {
-				log.Warn("No version tags found")
+				log.Warnf("No version tags found: %v", err)
+				log.Info("Defaulting to version 1.0.0")
 				fmt.Fprintln(cmd.OutOrStdout(), "1.0.0")
 
 				return
 			}
 			commitMessagesSinceTag, err := gitutils.GetCommitMessagesSinceCommitHash(repository, tagInfo.TagRef.Hash())
+			if errors.Is(err, gitutils.ErrNoCommitsFound) {
+				log.Info("No commits found since the latest version tag")
+
+				return
+			}
 			if err != nil {
 				log.Fatalf("failed to get commit messages since tag: %v", err)
 			}
 			nextVersion, err := semverutils.CalculateNextVersion(tagInfo.Name, commitMessagesSinceTag)
-			if err != nil {
-				log.Warnf("no new version calculated: %v", err)
-			} else {
-				fmt.Fprintln(cmd.OutOrStdout(), nextVersion)
+			if errors.Is(err, semverutils.ErrNoBump) {
+				log.Infof("No bump detected: %v", err)
+
+				return
 			}
+			if err != nil {
+				log.Fatalf("no new version calculated: %v", err)
+			}
+			fmt.Fprintln(cmd.OutOrStdout(), nextVersion)
 		},
 	}
 

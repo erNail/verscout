@@ -112,7 +112,7 @@ func TestGetTagsWithTimestamps_NoTags(t *testing.T) {
 	require.NoError(t, err)
 
 	tagsInfos, err := GetTagsWithTimestamps(repo)
-	require.NoError(t, err)
+	require.ErrorIs(t, err, ErrNoTags)
 	assert.Empty(t, tagsInfos)
 }
 
@@ -155,7 +155,7 @@ func TestGetLatestVersion_NoTags(t *testing.T) {
 	require.NoError(t, err)
 
 	tagInfo, err := GetLatestVersionTag(repo)
-	require.Error(t, err)
+	require.ErrorIs(t, err, ErrNoTags)
 	assert.Nil(t, tagInfo)
 }
 
@@ -170,7 +170,7 @@ func TestGetLatestVersion_NoValidSemVerTags(t *testing.T) {
 	require.NoError(t, err)
 
 	tagInfo, err := GetLatestVersionTag(repo)
-	require.Error(t, err)
+	require.ErrorIs(t, err, ErrNoValidVersionTags)
 	assert.Nil(t, tagInfo)
 }
 

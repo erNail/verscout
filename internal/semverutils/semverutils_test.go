@@ -44,7 +44,7 @@ func TestExtractSemVerStruct_InvalidFormat(t *testing.T) {
 	t.Parallel()
 
 	semVer, err := ExtractSemVerStruct("1.0")
-	require.Error(t, err)
+	require.ErrorIs(t, err, ErrInvalidSemVerTag)
 	assert.Nil(t, semVer)
 }
 
@@ -116,7 +116,7 @@ func TestCalculateNextVersion_ChoreCommit(t *testing.T) {
 	t.Parallel()
 
 	nextVersion, err := CalculateNextVersion("1.0.0", []string{"chore: update readme"})
-	require.Error(t, err)
+	require.ErrorIs(t, err, ErrNoBump)
 	assert.Empty(t, nextVersion)
 }
 
@@ -124,6 +124,6 @@ func TestCalculateNextVersion_NoCommits(t *testing.T) {
 	t.Parallel()
 
 	nextVersion, err := CalculateNextVersion("1.0.0", []string{})
-	require.Error(t, err)
+	require.ErrorIs(t, err, ErrNoCommitsFound)
 	assert.Empty(t, nextVersion)
 }
