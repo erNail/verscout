@@ -20,7 +20,7 @@ func TestNewNextCmd_NoTags(t *testing.T) {
 	err := nextCmd.Execute()
 	require.NoError(t, err)
 
-	assert.Contains(t, output.String(), "1.0.0")
+	assert.Equal(t, "1.0.0\n", output.String())
 }
 
 func TestNewNextCmd_ValidTag(t *testing.T) {
@@ -35,7 +35,7 @@ func TestNewNextCmd_ValidTag(t *testing.T) {
 	err := nextCmd.Execute()
 	require.NoError(t, err)
 
-	assert.Contains(t, output.String(), "1.0.1")
+	assert.Equal(t, "1.0.1\n", output.String())
 }
 
 func TestNewNextCmd_ValidTagWithVPrefix(t *testing.T) {
@@ -50,7 +50,7 @@ func TestNewNextCmd_ValidTagWithVPrefix(t *testing.T) {
 	err := nextCmd.Execute()
 	require.NoError(t, err)
 
-	assert.Contains(t, output.String(), "1.0.1")
+	assert.Equal(t, "1.0.1\n", output.String())
 }
 
 func TestNewNextCmd_InvalidTag(t *testing.T) {
@@ -68,7 +68,7 @@ func TestNewNextCmd_InvalidTag(t *testing.T) {
 	err := nextCmd.Execute()
 	require.NoError(t, err)
 
-	assert.Contains(t, output.String(), "1.0.0")
+	assert.Equal(t, "1.0.0\n", output.String())
 }
 
 func TestNewNextCmd_MajorBump(t *testing.T) {
@@ -88,7 +88,7 @@ func TestNewNextCmd_MajorBump(t *testing.T) {
 	err := nextCmd.Execute()
 	require.NoError(t, err)
 
-	assert.Contains(t, output.String(), "2.0.0")
+	assert.Equal(t, "2.0.0\n", output.String())
 }
 
 func TestNewNextCmd_MinorBump(t *testing.T) {
@@ -103,7 +103,7 @@ func TestNewNextCmd_MinorBump(t *testing.T) {
 	err := nextCmd.Execute()
 	require.NoError(t, err)
 
-	assert.Contains(t, output.String(), "1.1.0")
+	assert.Equal(t, "1.1.0\n", output.String())
 }
 
 func TestNewNextCmd_NoBumpChore(t *testing.T) {

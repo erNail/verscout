@@ -20,7 +20,7 @@ func TestNewLatestCmd_ValidTag(t *testing.T) {
 	err := latestCmd.Execute()
 	require.NoError(t, err)
 
-	assert.Contains(t, output.String(), "1.0.0")
+	assert.Equal(t, "1.0.0\n", output.String())
 }
 
 func TestNewLatestCmd_ValidTagWithVPrefix(t *testing.T) {
@@ -35,8 +35,7 @@ func TestNewLatestCmd_ValidTagWithVPrefix(t *testing.T) {
 	err := latestCmd.Execute()
 	require.NoError(t, err)
 
-	assert.Contains(t, output.String(), "1.0.0")
-	assert.NotContains(t, output.String(), "v1.0.0")
+	assert.Equal(t, "1.0.0\n", output.String())
 }
 
 func TestNewLatestCmd_InvalidTag(t *testing.T) {
@@ -51,7 +50,7 @@ func TestNewLatestCmd_InvalidTag(t *testing.T) {
 	err := latestCmd.Execute()
 	require.NoError(t, err)
 
-	assert.Contains(t, output.String(), "")
+	assert.Equal(t, "", output.String())
 }
 
 func TestNewLatestCmd_NoTag(t *testing.T) {
@@ -66,5 +65,5 @@ func TestNewLatestCmd_NoTag(t *testing.T) {
 	err := latestCmd.Execute()
 	require.NoError(t, err)
 
-	assert.Contains(t, output.String(), "")
+	assert.Equal(t, "", output.String())
 }
