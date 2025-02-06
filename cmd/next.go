@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Returns a cobra.Command that can be used as a subcommand.
 func NewNextCmd(git GitInterface, repoDirectoryPath *string) *cobra.Command {
 	nextCmd := &cobra.Command{
 		Use:   "next",

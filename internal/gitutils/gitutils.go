@@ -17,6 +17,7 @@ var (
 	ErrNoTags             = errors.New("no tags found")
 )
 
+// TagInfo holds information about a git tag including its name, timestamp, and reference.
 type TagInfo struct {
 	Name     string
 	UnixTime int64
@@ -32,6 +33,7 @@ func getCommitTimestamp(repo *git.Repository, hash plumbing.Hash) (int64, error)
 	return commit.Committer.When.Unix(), nil
 }
 
+// GetCommitFromTag retrieves the commit that a tag points to, handling both lightweight and annotated tags.
 func GetCommitFromTag(repo *git.Repository, tagRef *plumbing.Reference) (*object.Commit, error) {
 	tagObject, err := repo.TagObject(tagRef.Hash())
 	if errors.Is(err, plumbing.ErrObjectNotFound) {
@@ -57,6 +59,7 @@ func GetCommitFromTag(repo *git.Repository, tagRef *plumbing.Reference) (*object
 	return nil, fmt.Errorf("failed to get tag object for tag %s: %w", tagRef.Name().Short(), err)
 }
 
+// GetTagsWithTimestamps returns all tags in the repository with their associated timestamps.
 func GetTagsWithTimestamps(repo *git.Repository) ([]TagInfo, error) {
 	var tagsInfo []TagInfo
 
@@ -88,6 +91,7 @@ func GetTagsWithTimestamps(repo *git.Repository) ([]TagInfo, error) {
 	return tagsInfo, nil
 }
 
+// GetLatestVersionTag finds the most recent semantic version tag in the repository.
 func GetLatestVersionTag(repo *git.Repository) (*TagInfo, error) {
 	tags, err := GetTagsWithTimestamps(repo)
 	if err != nil {
@@ -113,6 +117,7 @@ func GetLatestVersionTag(repo *git.Repository) (*TagInfo, error) {
 	return &latestTag, nil
 }
 
+// GetLatestVersion returns the latest semantic version as a SemVer struct.
 func GetLatestVersion(repo *git.Repository) (*semverutils.SemVer, error) {
 	latestTag, err := GetLatestVersionTag(repo)
 	if err != nil {
@@ -127,6 +132,7 @@ func GetLatestVersion(repo *git.Repository) (*semverutils.SemVer, error) {
 	return semVer, nil
 }
 
+// GetCommitsSinceCommitHash returns all commits made after the specified commit hash.
 func GetCommitsSinceCommitHash(repo *git.Repository, commitHash plumbing.Hash) ([]*object.Commit, error) {
 	ref, err := repo.Head()
 	if err != nil {
@@ -166,6 +172,7 @@ func GetCommitsSinceCommitHash(repo *git.Repository, commitHash plumbing.Hash) (
 	return commits, nil
 }
 
+// GetCommitMessagesSinceCommitHash returns the commit messages for all commits made after the specified commit hash.
 func GetCommitMessagesSinceCommitHash(repo *git.Repository, commitHash plumbing.Hash) ([]string, error) {
 	commits, err := GetCommitsSinceCommitHash(repo, commitHash)
 	if err != nil {
