@@ -1,4 +1,6 @@
-package cmd
+//go:build test
+
+package gitutils
 
 import (
 	"fmt"
@@ -13,45 +15,14 @@ import (
 
 // Mock for GitRepository.
 type MockGit struct {
-	TagName           string
-	AdditionalCommits []string
+	Repo *git.Repository
 }
 
 func (m *MockGit) PlainOpen(_ string) (*git.Repository, error) {
-	repository, err := createTestRepo()
-	if err != nil {
-		return nil, fmt.Errorf("failed to create test repo: %w", err)
-	}
-
-	commitHash, err := createTestCommit(repository, "Initial commit", "README.md", "Hello, World!", time.Now())
-	if err != nil {
-		return nil, fmt.Errorf("failed to create test commit: %w", err)
-	}
-
-	if m.TagName != "" {
-		_, err = repository.CreateTag(m.TagName, commitHash, nil)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create tag: %w", err)
-		}
-	}
-
-	for index, message := range m.AdditionalCommits {
-		_, err = createTestCommit(
-			repository,
-			message,
-			"README.md",
-			"Hello again, World!",
-			time.Now().Add(time.Duration(index+1)*time.Hour),
-		)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create additional commit: %w", err)
-		}
-	}
-
-	return repository, nil
+	return m.Repo, nil
 }
 
-func createTestRepo() (*git.Repository, error) {
+func CreateTestRepo() (*git.Repository, error) {
 	fs := memfs.New()
 
 	repo, err := git.Init(memory.NewStorage(), fs)
@@ -62,7 +33,7 @@ func createTestRepo() (*git.Repository, error) {
 	return repo, nil
 }
 
-func createTestCommit(repo *git.Repository, message, fileName, content string, time time.Time) (plumbing.Hash, error) {
+func CreateTestCommit(repo *git.Repository, message, fileName, content string, time time.Time) (plumbing.Hash, error) {
 	worktree, err := repo.Worktree()
 	if err != nil {
 		return plumbing.ZeroHash, fmt.Errorf("failed to commit: %w", err)
@@ -97,4 +68,38 @@ func createTestCommit(repo *git.Repository, message, fileName, content string, t
 	}
 
 	return commitHash, nil
+}
+
+func CreateTag(
+	repo *git.Repository,
+	tagName string,
+	commitHash plumbing.Hash,
+) (*plumbing.Reference, error) {
+	tagHash, err := repo.CreateTag(tagName, commitHash, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create annotated tag: %w", err)
+	}
+
+	return tagHash, nil
+}
+
+func CreateAnnotatedTag(
+	repo *git.Repository,
+	tagName string,
+	commitHash plumbing.Hash,
+	message string,
+) (*plumbing.Reference, error) {
+	tagHash, err := repo.CreateTag(tagName, commitHash, &git.CreateTagOptions{
+		Message: message,
+		Tagger: &object.Signature{
+			Name:  "Test Tagger",
+			Email: "tagger@test.com",
+			When:  time.Now(),
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create annotated tag: %w", err)
+	}
+
+	return tagHash, nil
 }

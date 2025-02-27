@@ -8,7 +8,7 @@ tasks:
 
   test:
     cmds:
-      - "go test ./..."
+      - "go test ./... -tags=test"
 
   run:
     cmds:
