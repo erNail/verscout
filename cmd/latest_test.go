@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewLatestCmd_ValidTag(t *testing.T) {
+func TestHandleLatestCommand_ValidTag(t *testing.T) {
 	t.Parallel()
 
 	repo, err := gitutils.CreateTestRepo()
@@ -21,18 +21,17 @@ func TestNewLatestCmd_ValidTag(t *testing.T) {
 	require.NoError(t, err)
 
 	repoDirectoryPath := "."
-	latestCmd := NewLatestCmd(&gitutils.MockGit{Repo: repo}, &repoDirectoryPath)
 
 	var output bytes.Buffer
 
-	latestCmd.SetOut(&output)
-	err = latestCmd.Execute()
+	err = HandleLatestCommand(&output, &gitutils.MockGit{Repo: repo}, &repoDirectoryPath, 0)
+	require.NoError(t, err)
 	require.NoError(t, err)
 
 	assert.Equal(t, "1.0.0\n", output.String())
 }
 
-func TestNewLatestCmd_ValidTagWithVPrefix(t *testing.T) {
+func TestHandleLatestCommand_ValidTagWithVPrefix(t *testing.T) {
 	t.Parallel()
 
 	repo, err := gitutils.CreateTestRepo()
@@ -41,20 +40,17 @@ func TestNewLatestCmd_ValidTagWithVPrefix(t *testing.T) {
 	require.NoError(t, err)
 	_, err = gitutils.CreateTag(repo, "v1.0.0", commitHash)
 	require.NoError(t, err)
-
 	repoDirectoryPath := "."
-	latestCmd := NewLatestCmd(&gitutils.MockGit{Repo: repo}, &repoDirectoryPath)
 
 	var output bytes.Buffer
 
-	latestCmd.SetOut(&output)
-	err = latestCmd.Execute()
+	err = HandleLatestCommand(&output, &gitutils.MockGit{Repo: repo}, &repoDirectoryPath, 0)
 	require.NoError(t, err)
 
 	assert.Equal(t, "1.0.0\n", output.String())
 }
 
-func TestNewLatestCmd_InvalidTag(t *testing.T) {
+func TestHandleLatestCommand_InvalidTag(t *testing.T) {
 	t.Parallel()
 
 	repo, err := gitutils.CreateTestRepo()
@@ -65,18 +61,16 @@ func TestNewLatestCmd_InvalidTag(t *testing.T) {
 	require.NoError(t, err)
 
 	repoDirectoryPath := "."
-	latestCmd := NewLatestCmd(&gitutils.MockGit{Repo: repo}, &repoDirectoryPath)
 
 	var output bytes.Buffer
 
-	latestCmd.SetOut(&output)
-	err = latestCmd.Execute()
+	err = HandleLatestCommand(&output, &gitutils.MockGit{Repo: repo}, &repoDirectoryPath, 0)
 	require.NoError(t, err)
 
 	assert.Equal(t, "", output.String())
 }
 
-func TestNewLatestCmd_NoTag(t *testing.T) {
+func TestHandleLatestCommand_NoTag(t *testing.T) {
 	t.Parallel()
 
 	repo, err := gitutils.CreateTestRepo()
@@ -85,18 +79,16 @@ func TestNewLatestCmd_NoTag(t *testing.T) {
 	require.NoError(t, err)
 
 	repoDirectoryPath := "."
-	latestCmd := NewLatestCmd(&gitutils.MockGit{Repo: repo}, &repoDirectoryPath)
 
 	var output bytes.Buffer
 
-	latestCmd.SetOut(&output)
-	err = latestCmd.Execute()
+	err = HandleLatestCommand(&output, &gitutils.MockGit{Repo: repo}, &repoDirectoryPath, 0)
 	require.NoError(t, err)
 
 	assert.Equal(t, "", output.String())
 }
 
-func TestNewLatestCmd_AnnotatedTag(t *testing.T) {
+func TestHandleLatestCommand_AnnotatedTag(t *testing.T) {
 	t.Parallel()
 
 	repo, err := gitutils.CreateTestRepo()
@@ -107,13 +99,26 @@ func TestNewLatestCmd_AnnotatedTag(t *testing.T) {
 	require.NoError(t, err)
 
 	repoDirectoryPath := "."
-	latestCmd := NewLatestCmd(&gitutils.MockGit{Repo: repo}, &repoDirectoryPath)
 
 	var output bytes.Buffer
 
-	latestCmd.SetOut(&output)
-	err = latestCmd.Execute()
+	err = HandleLatestCommand(&output, &gitutils.MockGit{Repo: repo}, &repoDirectoryPath, 0)
 	require.NoError(t, err)
 
 	assert.Equal(t, "1.0.0\n", output.String())
+}
+
+func TestNewLatestCommand(t *testing.T) {
+	t.Parallel()
+
+	repo, err := gitutils.CreateTestRepo()
+	require.NoError(t, err)
+	_, err = gitutils.CreateTestCommit(repo, "First commit", "README.md", "Hello, World!", time.Now())
+	require.NoError(t, err)
+
+	repoDirectoryPath := "."
+
+	cmd := NewLatestCmd(&gitutils.MockGit{Repo: repo}, &repoDirectoryPath)
+	err = cmd.Execute()
+	require.NoError(t, err)
 }
