@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"io"
 
 	"github.com/erNail/verscout/internal/gitutils"
 	"github.com/erNail/verscout/internal/semverutils"
@@ -16,40 +17,49 @@ func NewNextCmd(git GitInterface, repoDirectoryPath *string) *cobra.Command {
 		Use:   "next",
 		Short: "Calculate the next version",
 		Long:  "Calculate the next version in the format MAJOR.MINOR.PATCH",
-		Run: func(cmd *cobra.Command, _ []string) {
-			repository, err := git.PlainOpen(*repoDirectoryPath)
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			err := HandleNextCommand(cmd.OutOrStdout(), git, repoDirectoryPath)
 			if err != nil {
-				log.Fatalf("failed to open repository: %v", err)
+				return fmt.Errorf("error while running next command: %w", err)
 			}
-			tagInfo, err := gitutils.GetLatestVersionTag(repository)
-			if err != nil {
-				log.Warnf("No version tags found: %v", err)
-				log.Info("Defaulting to version 1.0.0")
-				fmt.Fprintln(cmd.OutOrStdout(), "1.0.0")
-
-				return
-			}
-			commitMessagesSinceTag, err := gitutils.GetCommitMessagesSinceCommitHash(repository, tagInfo.TagRef.Hash())
-			if errors.Is(err, gitutils.ErrNoCommitsFound) {
-				log.Info("No commits found since the latest version tag")
-
-				return
-			}
-			if err != nil {
-				log.Fatalf("failed to get commit messages since tag: %v", err)
-			}
-			nextVersion, err := semverutils.CalculateNextVersion(tagInfo.Name, commitMessagesSinceTag)
-			if errors.Is(err, semverutils.ErrNoBump) {
-				log.Infof("No bump detected: %v", err)
-
-				return
-			}
-			if err != nil {
-				log.Fatalf("no new version calculated: %v", err)
-			}
-			fmt.Fprintln(cmd.OutOrStdout(), nextVersion)
+			return nil
 		},
 	}
 
 	return nextCmd
+}
+
+func HandleNextCommand(writer io.Writer, git GitInterface, repoDirectoryPath *string) error {
+	repository, err := git.PlainOpen(*repoDirectoryPath)
+	if err != nil {
+		return fmt.Errorf("failed to open repository: %w", err)
+	}
+	tagInfo, err := gitutils.GetLatestVersionTag(repository)
+	if err != nil {
+		defaultVersion := "1.0.0"
+		log.Warnf("No version tags found: %v", err)
+		log.WithField("defaultVersion", defaultVersion).Info("Using default version")
+		fmt.Fprintln(writer, defaultVersion)
+		return nil
+	}
+	commitMessagesSinceTag, err := gitutils.GetCommitMessagesSinceCommitHash(repository, tagInfo.TagRef.Hash())
+	if errors.Is(err, gitutils.ErrNoCommitsFound) {
+		log.Infof("No commits found since the latest version tag: %v", err)
+
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("failed to get commit messages since tag: %w", err)
+	}
+	nextVersion, err := semverutils.CalculateNextVersion(tagInfo.Name, commitMessagesSinceTag)
+	if errors.Is(err, semverutils.ErrNoBump) {
+		log.Infof("No bump detected: %v", err)
+
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("no new version calculated: %w", err)
+	}
+	fmt.Fprintln(writer, nextVersion)
+	return nil
 }
