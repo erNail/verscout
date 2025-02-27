@@ -10,9 +10,9 @@ linters:
     - "err113"
     - "depguard"
     - "funlen"
-    - "exportloopref"
     - "dupl"
     - "gochecknoglobals"
+    - "tenv"
 linters-settings:
   mnd:
     ignored-numbers:
