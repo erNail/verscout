@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"os"
 
 	"github.com/go-git/go-git/v5"
 	log "github.com/sirupsen/logrus"
@@ -26,6 +28,19 @@ func (g *Git) PlainOpen(path string) (*git.Repository, error) {
 	return repo, nil
 }
 
+type ExitError struct {
+	Code int
+	Err  error
+}
+
+func (e *ExitError) Error() string {
+	return e.Err.Error()
+}
+
+func (e *ExitError) Unwrap() error {
+	return e.Err
+}
+
 // This will be set during the build via `-ldflags "-s -w -X github.com/erNail/verscout/cmd.version={{ .Version }}"`.
 var version = "dev"
 
@@ -35,10 +50,12 @@ func NewRootCmd() *cobra.Command {
 	var repoDirectoryPath string
 
 	rootCmd := &cobra.Command{
-		Use:     "verscout",
-		Short:   "Find the latest version tag and calculate the next version",
-		Long:    `Find the latest version tag and calculate the next version based on conventional commits`,
-		Version: version,
+		Use:           "verscout",
+		Short:         "Find the latest version tag and calculate the next version",
+		Long:          `Find the latest version tag and calculate the next version based on conventional commits`,
+		Version:       version,
+		SilenceErrors: true,
+		SilenceUsage:  true,
 	}
 
 	rootCmd.PersistentFlags().StringVarP(&repoDirectoryPath, "dir", "d", ".", "directory path to the git repository")
@@ -54,6 +71,12 @@ func Execute() {
 
 	err := cmd.Execute()
 	if err != nil {
+		var exitErr *ExitError
+		if errors.As(err, &exitErr) {
+			log.Error(err)
+			os.Exit(exitErr.Code)
+		}
+
 		log.Fatal(err)
 	}
 }
