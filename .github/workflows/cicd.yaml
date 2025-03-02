@@ -60,7 +60,7 @@ jobs:
             exit 0
           fi
           if [ "${{ github.ref_name }}" != "${{ github.event.repository.default_branch }}" ]; then
-            VERSION="${VERSION}-rc"
+            VERSION="${VERSION}-rc${{github.run_id}}"
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
