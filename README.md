@@ -130,6 +130,21 @@ You can change this behavior with the `--exit-code` flag
 verscout latest --exit-code 4
 ```
 
+#### Options for `verscout next`
+
+By default, `verscout next` will exit with code `0` if no next version is found due to expected reasons.
+
+The expected reasons are:
+
+- There are no new commit messages since the last tag
+- There are no new commit message since the last tag that use any keywords that will cause a version bump
+
+You can change this behavior with the `--exit-code` flag
+
+```shell
+verscout next --exit-code 4
+```
+
 ### Limitations
 
 - The format of the version tags is currently not configurable
