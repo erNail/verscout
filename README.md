@@ -17,6 +17,7 @@
 `verscout` is a single binary CLI tool. `verscout latest` will print the latest version tag of your repository to STDOUT.
 `verscout next` will calculate the next version tag based on
 [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/), and print it to STDOUT.
+If no latest or next version exists, `verscout` will print nothing to STDOUT and exit with code `0` by default.
 
 `verscout` will not create and push any tags.
 It will not bump any versions in any files.
@@ -33,6 +34,7 @@ Most other tools known to me did not fulfill my requirements:
 - Print the latest version to STDOUT
 - Print the next version to STDOUT
 - Print no next version to STDOUT if there are no new commits that should cause a version bump
+  and exit with code `0`
 
 ## Getting Started
 
@@ -91,6 +93,42 @@ verscout next
 For verscout to calculate the next version,
 [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
 using `fix`, `feat` or `BREAKING CHANGE:` need to exist since the latest version tag.
+
+### Configure `verscout`
+
+To get a complete list of the configuration options, please use the `--help` or `-h` flag.
+
+```shell
+verscout --help
+```
+
+#### Global options
+
+##### Working Directory
+
+By default, `verscout` will run in the current working directory.
+Use the `--dir` flag to change this behavior.
+
+```shell
+verscout --dir ./my-other-repository
+```
+
+#### Options for `verscout latest`
+
+##### Exit Code if no latest version is found
+
+By default, `verscout latest` will exit with code `0` if no latest version is found due to expected reasons.
+
+The expected reasons are:
+
+- There are no existing tags
+- There are no valid version tags
+
+You can change this behavior with the `--exit-code` flag
+
+```shell
+verscout latest --exit-code 4
+```
 
 ### Limitations
 
