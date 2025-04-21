@@ -127,3 +127,43 @@ func TestCalculateNextVersion_NoCommits(t *testing.T) {
 	require.ErrorIs(t, err, ErrNoCommitsFound)
 	assert.Empty(t, nextVersion)
 }
+
+func TestIsValidPreReleaseString_ValidVPrefix(t *testing.T) {
+	t.Parallel()
+	assert.True(t, IsValidPreReleaseString("v1.2.3-rc.1", "-rc."))
+}
+
+func TestIsValidPreReleaseString_ValidNoVPrefix(t *testing.T) {
+	t.Parallel()
+	assert.True(t, IsValidPreReleaseString("1.2.3-rc.1", "-rc."))
+}
+
+func TestIsValidPreReleaseString_ValidPep440(t *testing.T) {
+	t.Parallel()
+	assert.True(t, IsValidPreReleaseString("1.2.3rc1", "rc"))
+}
+
+func TestIsValidPreReleaseString_ValidSymbols(t *testing.T) {
+	t.Parallel()
+	assert.True(t, IsValidPreReleaseString("1.2.3alpha@foo-bar+baz.2", "alpha@foo-bar+baz."))
+}
+
+func TestIsValidPreReleaseString_InvalidEndingDigitMissing(t *testing.T) {
+	t.Parallel()
+	assert.False(t, IsValidPreReleaseString("v1.2.3-rc", "-rc"))
+}
+
+func TestIsValidPreReleaseString_InvalidFormatStartsWithDigit(t *testing.T) {
+	t.Parallel()
+	assert.False(t, IsValidPreReleaseString("v1.2.31rc", "1rc"))
+}
+
+func TestIsValidPreReleaseString_InvalidFormatEndsWithDigit(t *testing.T) {
+	t.Parallel()
+	assert.False(t, IsValidPreReleaseString("v1.2.3rc12", "rc1"))
+}
+
+func TestIsValidPreReleaseString_InvalidWrongSeparator(t *testing.T) {
+	t.Parallel()
+	assert.False(t, IsValidPreReleaseString("v1.2.3.rc1", "-rc"))
+}

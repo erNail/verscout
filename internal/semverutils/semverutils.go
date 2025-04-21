@@ -71,6 +71,19 @@ func ExtractSemVerStruct(versionTag string) (*SemVer, error) {
 	}, nil
 }
 
+func IsValidPreReleaseString(preReleaseString string, preReleaseFormat string) bool {
+	validPreReleaseFormatRegex := regexp.MustCompile(`^[^\d].*[^\d]$`)
+	if !validPreReleaseFormatRegex.MatchString(preReleaseFormat) {
+		return false
+	}
+
+	escapedFormat := regexp.QuoteMeta(preReleaseFormat)
+	validPreReleaseStringRegex := fmt.Sprintf(`^v?\d+\.\d+\.\d+%s\d+$`, escapedFormat)
+
+	preReleaseRegex := regexp.MustCompile(validPreReleaseStringRegex)
+	return preReleaseRegex.MatchString(preReleaseString)
+}
+
 // String returns the string representation of a SemVer in the format X.Y.Z.
 func (semVer *SemVer) String() string {
 	return fmt.Sprintf("%d.%d.%d", semVer.Major, semVer.Minor, semVer.Patch)

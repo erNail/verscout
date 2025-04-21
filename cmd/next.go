@@ -16,7 +16,11 @@ import (
 // It uses git operations to find the latest version tag and analyzes commit messages to
 // determine the next version according to semantic versioning rules.
 func NewNextCmd(git GitInterface, repoDirectoryPath *string) *cobra.Command {
-	var noLatestVersionExitCode int
+	var (
+		noLatestVersionExitCode int
+		preRelease              bool
+		preReleaseFormat        string
+	)
 
 	nextCmd := &cobra.Command{
 		Use:   "next",
@@ -34,6 +38,10 @@ func NewNextCmd(git GitInterface, repoDirectoryPath *string) *cobra.Command {
 
 	nextCmd.Flags().
 		IntVarP(&noLatestVersionExitCode, "exit-code", "e", 0, "The exit code to use when no latest version is found")
+	nextCmd.Flags().
+		BoolVar(&preRelease, "pre-release", false, "If this flag is set, the next version will be a pre-release version")
+	nextCmd.Flags().
+		StringVar(&preReleaseFormat, "pre-release-format", "-rc.", "The format to use for pre-release versions. Examples: If set to `-rc.`, the next version would look like `1.2.3-rc.4`. If set to `rc`, the next version would look like `1.2.3rc4`.")
 
 	return nextCmd
 }
