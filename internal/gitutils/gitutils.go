@@ -12,9 +12,12 @@ import (
 )
 
 var (
-	ErrNoCommitsFound     = errors.New("no commits found since given hash")
+	// ErrNoCommitsFound indicates that no commits were found since the given hash.
+	ErrNoCommitsFound = errors.New("no commits found since given hash")
+	// ErrNoValidVersionTags indicates that no valid version tags were found.
 	ErrNoValidVersionTags = errors.New("no valid version tags found")
-	ErrNoTags             = errors.New("no tags found")
+	// ErrNoTags indicates that no tags were found in the repository.
+	ErrNoTags = errors.New("no tags found")
 )
 
 // TagInfo holds information about a git tag including its name, timestamp, and reference.
@@ -24,6 +27,7 @@ type TagInfo struct {
 	TagRef   *plumbing.Reference
 }
 
+// getCommitTimestamp retrieves the Unix timestamp of a commit given its hash.
 func getCommitTimestamp(repo *git.Repository, hash plumbing.Hash) (int64, error) {
 	commit, err := repo.CommitObject(hash)
 	if err != nil {
@@ -40,7 +44,11 @@ func GetCommitFromTag(repo *git.Repository, tagRef *plumbing.Reference) (*object
 		// Lightweight tag, points directly to a commit
 		commit, err := repo.CommitObject(tagRef.Hash())
 		if err != nil {
-			return nil, fmt.Errorf("failed to get commit object for lightweight tag %s: %w", tagRef.Name().Short(), err)
+			return nil, fmt.Errorf(
+				"failed to get commit object for lightweight tag %s: %w",
+				tagRef.Name().Short(),
+				err,
+			)
 		}
 
 		return commit, nil
@@ -50,7 +58,11 @@ func GetCommitFromTag(repo *git.Repository, tagRef *plumbing.Reference) (*object
 		// Annotated tag, points to a tag object which points to a commit
 		commit, err := repo.CommitObject(tagObject.Target)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get commit object for annotated tag %s: %w", tagRef.Name().Short(), err)
+			return nil, fmt.Errorf(
+				"failed to get commit object for annotated tag %s: %w",
+				tagRef.Name().Short(),
+				err,
+			)
 		}
 
 		return commit, nil
@@ -71,7 +83,11 @@ func GetTagsWithTimestamps(repo *git.Repository) ([]TagInfo, error) {
 	err = tagRefs.ForEach(func(tagRef *plumbing.Reference) error {
 		commit, err := GetCommitFromTag(repo, tagRef)
 		if err != nil {
-			return fmt.Errorf("failed to get commit object for tag %s: %w", tagRef.Name().Short(), err)
+			return fmt.Errorf(
+				"failed to get commit object for tag %s: %w",
+				tagRef.Name().Short(),
+				err,
+			)
 		}
 
 		commitTime := commit.Committer.When.Unix()
@@ -133,7 +149,10 @@ func GetLatestVersion(repo *git.Repository) (*semverutils.SemVer, error) {
 }
 
 // GetCommitsSinceCommitHash returns all commits made after the specified commit hash.
-func GetCommitsSinceCommitHash(repo *git.Repository, commitHash plumbing.Hash) ([]*object.Commit, error) {
+func GetCommitsSinceCommitHash(
+	repo *git.Repository,
+	commitHash plumbing.Hash,
+) ([]*object.Commit, error) {
 	ref, err := repo.Head()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get HEAD: %w", err)
@@ -173,7 +192,10 @@ func GetCommitsSinceCommitHash(repo *git.Repository, commitHash plumbing.Hash) (
 }
 
 // GetCommitMessagesSinceCommitHash returns the commit messages for all commits made after the specified commit hash.
-func GetCommitMessagesSinceCommitHash(repo *git.Repository, commitHash plumbing.Hash) ([]string, error) {
+func GetCommitMessagesSinceCommitHash(
+	repo *git.Repository,
+	commitHash plumbing.Hash,
+) ([]string, error) {
 	commits, err := GetCommitsSinceCommitHash(repo, commitHash)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get commits since commit hash: %w", err)

@@ -1,3 +1,6 @@
+// Package semverutils provides utilities for handling semantic versioning operations,
+// including version parsing, validation, and calculating version bumps based on
+// conventional commit messages.
 package semverutils
 
 import (
@@ -11,9 +14,13 @@ import (
 )
 
 var (
-	ErrNoCommitsFound      = errors.New("no commits found")
-	ErrNoBump              = errors.New("no conventional commits found that affect the version")
-	ErrInvalidSemVerTag    = errors.New("invalid semantic version tag")
+	// ErrNoCommitsFound is returned when no git commits are found for analysis.
+	ErrNoCommitsFound = errors.New("no commits found")
+	// ErrNoBump is returned when no commits are found that would trigger a version bump.
+	ErrNoBump = errors.New("no conventional commits found that affect the version")
+	// ErrInvalidSemVerTag is returned when a version tag doesn't follow semantic versioning format.
+	ErrInvalidSemVerTag = errors.New("invalid semantic version tag")
+	// ErrInvalidCommitFormat is returned when a commit message doesn't follow conventional commit format.
 	ErrInvalidCommitFormat = errors.New("invalid conventional commit format")
 )
 
@@ -35,6 +42,7 @@ const (
 	MajorBump
 )
 
+// IsValidSemVerTag checks if the provided string is a valid semantic version tag.
 // The tag may optionally start with 'v' and must follow the format X.Y.Z where X, Y, and Z are non-negative integers.
 func IsValidSemVerTag(semVerString string) bool {
 	semVerRegex := regexp.MustCompile(`^v?\d+\.\d+\.\d+$`)
@@ -42,7 +50,8 @@ func IsValidSemVerTag(semVerString string) bool {
 	return semVerRegex.MatchString(semVerString)
 }
 
-// Returns an error if the string is not a valid semantic version.
+// ExtractSemVerStruct parses a version tag string and returns a SemVer struct.
+// It returns an error if the string is not a valid semantic version.
 func ExtractSemVerStruct(versionTag string) (*SemVer, error) {
 	if !IsValidSemVerTag(versionTag) {
 		return nil, ErrInvalidSemVerTag

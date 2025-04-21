@@ -1,3 +1,4 @@
+// Package cmd provides the command line interface for verscout
 package cmd
 
 import (
@@ -11,7 +12,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Returns a cobra.Command that can be used as a subcommand.
+// NewNextCmd creates and returns a cobra.Command for calculating the next semantic version.
+// It uses git operations to find the latest version tag and analyzes commit messages to
+// determine the next version according to semantic versioning rules.
 func NewNextCmd(git GitInterface, repoDirectoryPath *string) *cobra.Command {
 	var noLatestVersionExitCode int
 
@@ -35,6 +38,9 @@ func NewNextCmd(git GitInterface, repoDirectoryPath *string) *cobra.Command {
 	return nextCmd
 }
 
+// HandleNextCommand performs the version calculation logic for the next command.
+// It retrieves the latest version tag, analyzes commit messages since that tag,
+// and calculates the next version based on semantic versioning rules.
 func HandleNextCommand(writer io.Writer, git GitInterface, repoDirectoryPath *string, noNextVersionExitCode int) error {
 	repository, err := git.PlainOpen(*repoDirectoryPath)
 	if err != nil {
@@ -47,7 +53,11 @@ func HandleNextCommand(writer io.Writer, git GitInterface, repoDirectoryPath *st
 
 		log.Warnf("No version tags found: %v", err)
 		log.WithField("defaultVersion", defaultVersion).Info("Using default version")
-		fmt.Fprintln(writer, defaultVersion)
+
+		_, err = fmt.Fprintln(writer, defaultVersion)
+		if err != nil {
+			return fmt.Errorf("failed to write version: %w", err)
+		}
 
 		return nil
 	}
@@ -82,7 +92,10 @@ func HandleNextCommand(writer io.Writer, git GitInterface, repoDirectoryPath *st
 		return fmt.Errorf("no new version calculated: %w", err)
 	}
 
-	fmt.Fprintln(writer, nextVersion)
+	_, err = fmt.Fprintln(writer, nextVersion)
+	if err != nil {
+		return fmt.Errorf("failed to write next version: %w", err)
+	}
 
 	return nil
 }

@@ -1,5 +1,8 @@
 //go:build test
 
+// Package gitutils provides testing utilities for working with Git repositories.
+// It includes mock implementations and helper functions for creating test repositories,
+// commits, and tags in memory.
 package gitutils
 
 import (
@@ -13,15 +16,18 @@ import (
 	"github.com/go-git/go-git/v5/storage/memory"
 )
 
-// Mock for GitRepository.
+// MockGit provides a mock implementation of the GitRepository interface for testing.
 type MockGit struct {
 	Repo *git.Repository
 }
 
+// PlainOpen implements the GitRepository interface by returning the mock repository.
+// The path parameter is ignored in this mock implementation.
 func (m *MockGit) PlainOpen(_ string) (*git.Repository, error) {
 	return m.Repo, nil
 }
 
+// CreateTestRepo creates a new in-memory Git repository for testing purposes.
 func CreateTestRepo() (*git.Repository, error) {
 	fs := memfs.New()
 
@@ -33,6 +39,8 @@ func CreateTestRepo() (*git.Repository, error) {
 	return repo, nil
 }
 
+// CreateTestCommit creates a new commit in the given repository with the specified message,
+// file name, content, and timestamp.
 func CreateTestCommit(repo *git.Repository, message, fileName, content string, time time.Time) (plumbing.Hash, error) {
 	worktree, err := repo.Worktree()
 	if err != nil {
@@ -49,7 +57,10 @@ func CreateTestCommit(repo *git.Repository, message, fileName, content string, t
 		return plumbing.ZeroHash, fmt.Errorf("failed to write file: %w", err)
 	}
 
-	file.Close()
+	err = file.Close()
+	if err != nil {
+		return plumbing.ZeroHash, fmt.Errorf("failed to close file: %w", err)
+	}
 
 	_, err = worktree.Add(fileName)
 	if err != nil {
@@ -70,6 +81,7 @@ func CreateTestCommit(repo *git.Repository, message, fileName, content string, t
 	return commitHash, nil
 }
 
+// CreateTag creates a lightweight tag in the repository pointing to the given commit.
 func CreateTag(
 	repo *git.Repository,
 	tagName string,
@@ -83,6 +95,8 @@ func CreateTag(
 	return tagHash, nil
 }
 
+// CreateAnnotatedTag creates a new annotated tag in the repository pointing to the given commit
+// with the specified message and default tagger information.
 func CreateAnnotatedTag(
 	repo *git.Repository,
 	tagName string,

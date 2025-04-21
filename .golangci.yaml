@@ -1,24 +1,33 @@
 ---
+version: "2"
 run:
   build-tags:
     - "test"
 linters:
-  enable-all: true
+  default: "all"
   disable:
-    - "testpackage"
-    - "exhaustruct"
-    - "err113"
     - "depguard"
-    - "funlen"
     - "dupl"
+    - "err113"
+    - "exhaustruct"
+    - "funlen"
     - "gochecknoglobals"
-    - "tenv"
-linters-settings:
-  mnd:
-    ignored-numbers:
-      - "0o644"
-      - "0o755"
-      - "42"
-  goconst:
-    ignore-tests: true
+    - "testpackage"
+    - "cyclop"
+  settings:
+    mnd:
+      ignored-numbers:
+        - "0o644"
+        - "0o755"
+        - "42"
+formatters:
+  enable:
+    - "gci"
+    - "gofmt"
+    - "gofumpt"
+    - "goimports"
+    - "golines"
+  settings:
+    golines:
+      max-len: 120
 ...
