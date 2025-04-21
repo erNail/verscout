@@ -28,6 +28,8 @@ func (g *Git) PlainOpen(path string) (*git.Repository, error) {
 	return repo, nil
 }
 
+// ExitError is a custom error type that includes an exit code and an underlying error.
+// It is used to signal specific exit conditions for the CLI application.
 type ExitError struct {
 	Code int
 	Err  error

@@ -67,7 +67,7 @@ func TestHandleLatestCommand_InvalidTag(t *testing.T) {
 	err = HandleLatestCommand(&output, &gitutils.MockGit{Repo: repo}, &repoDirectoryPath, 0)
 	require.NoError(t, err)
 
-	assert.Equal(t, "", output.String())
+	assert.Empty(t, output.String())
 }
 
 func TestHandleLatestCommand_NoTag(t *testing.T) {
@@ -85,7 +85,7 @@ func TestHandleLatestCommand_NoTag(t *testing.T) {
 	err = HandleLatestCommand(&output, &gitutils.MockGit{Repo: repo}, &repoDirectoryPath, 0)
 	require.NoError(t, err)
 
-	assert.Equal(t, "", output.String())
+	assert.Empty(t, output.String())
 }
 
 func TestHandleLatestCommand_AnnotatedTag(t *testing.T) {

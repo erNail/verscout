@@ -193,7 +193,7 @@ func TestHandleNextCommand_NoBumpChore(t *testing.T) {
 	err = HandleNextCommand(&output, &gitutils.MockGit{Repo: repo}, &repoDirectoryPath, 0)
 	require.NoError(t, err)
 
-	assert.Equal(t, "", output.String())
+	assert.Empty(t, output.String())
 }
 
 func TestHandleNextCommand_NoBumpNoAdditionalCommits(t *testing.T) {
@@ -213,7 +213,7 @@ func TestHandleNextCommand_NoBumpNoAdditionalCommits(t *testing.T) {
 	err = HandleNextCommand(&output, &gitutils.MockGit{Repo: repo}, &repoDirectoryPath, 0)
 	require.NoError(t, err)
 
-	assert.Equal(t, "", output.String())
+	assert.Empty(t, output.String())
 }
 
 func TestHandleNextCommand_AnnotatedExistingTag(t *testing.T) {

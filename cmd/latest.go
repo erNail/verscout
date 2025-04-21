@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Returns a cobra.Command that can be used as a subcommand.
+// NewLatestCmd creates and returns a cobra.Command for retrieving the latest version tag.
 func NewLatestCmd(git GitInterface, repoDirectoryPath *string) *cobra.Command {
 	var noLatestVersionExitCode int
 
@@ -34,6 +34,7 @@ func NewLatestCmd(git GitInterface, repoDirectoryPath *string) *cobra.Command {
 	return latestCmd
 }
 
+// HandleLatestCommand performs the version retrieval logic for the latest command.
 func HandleLatestCommand(
 	writer io.Writer,
 	git GitInterface,
@@ -61,7 +62,11 @@ func HandleLatestCommand(
 	}
 
 	log.WithField("version", semVer.String()).Info("Found latest version")
-	fmt.Fprintln(writer, semVer.String())
+
+	_, err = fmt.Fprintln(writer, semVer.String())
+	if err != nil {
+		return fmt.Errorf("failed to write latest version: %w", err)
+	}
 
 	return nil
 }
