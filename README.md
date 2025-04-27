@@ -91,8 +91,12 @@ verscout next
 ```
 
 For verscout to calculate the next version,
-[Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
-using `fix`, `feat` or `BREAKING CHANGE:` need to exist since the latest version tag.
+[Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) need to exist since the latest version tag.
+
+In the default configuration, using `fix:` will cause a `PATCH` bump,
+using `feat:` will cause a `MINOR` bump,
+and using `BREAKING CHANGE:` in the commit message body will cause a `MAJOR` bump.
+This behavior can be [configured](#custom-bump-configuration)
 
 ### Configure `verscout`
 
@@ -132,6 +136,33 @@ verscout latest --exit-code 4
 
 #### Options for `verscout next`
 
+##### Custom Bump Configuration
+
+You can configure which conventional commit keywords cause which kind of bump in a `.verscout-config.yaml`
+This is the default configuration used by `verscout`:
+
+```yaml
+---
+bumps:
+  majorPatterns:
+    - "(?m)^BREAKING CHANGE:"
+  minorPatterns:
+    - "^feat(\\(.*\\))?:"
+  patchPatterns:
+    - "^fix(\\(.*\\))?:"
+...
+```
+
+The expressions are evaluated using Go's `regexp` package.
+
+You can also specify a different file path:
+
+```shell
+verscout next --config path/to/your/config.yaml
+```
+
+##### Exit Code if no next version is found
+
 By default, `verscout next` will exit with code `0` if no next version is found due to expected reasons.
 
 The expected reasons are:
@@ -148,8 +179,6 @@ verscout next --exit-code 4
 ### Limitations
 
 - The format of the version tags is currently not configurable
-- Which [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
-  should cause a version bump is currently not configurable
 - Bumping any prerelease or release candidate versions is not supported
 
 ## Planned Features and Limitations

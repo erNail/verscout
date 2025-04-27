@@ -79,7 +79,7 @@ func (semVer *SemVer) String() string {
 // Returns ErrNoCommitsFound if the commit list is empty.
 // Returns ErrNoBump if no version bump is required.
 // Returns ErrInvalidSemVerTag if the tag does not follow semantic versioning format.
-func CalculateNextVersion(versionTag string, commitMessages []string) (string, error) {
+func CalculateNextVersion(versionTag string, commitMessages []string, bumpConfig BumpConfig) (string, error) {
 	if len(commitMessages) == 0 {
 		return "", ErrNoCommitsFound
 	}
@@ -90,7 +90,7 @@ func CalculateNextVersion(versionTag string, commitMessages []string) (string, e
 		return "", fmt.Errorf("failed to extract SemVer struct: %w", err)
 	}
 
-	bumpType := determineBumpType(commitMessages)
+	bumpType := determineBumpType(commitMessages, bumpConfig)
 	if bumpType == NoBump {
 		return "", ErrNoBump
 	}
@@ -100,30 +100,35 @@ func CalculateNextVersion(versionTag string, commitMessages []string) (string, e
 	return nextSemVer.String(), nil
 }
 
-func determineBumpType(commitMessages []string) BumpType {
-	featRegex := regexp.MustCompile(`^feat(\(.*\))?:`)
-	fixRegex := regexp.MustCompile(`^fix(\(.*\))?:`)
-	breakingChangeRegex := regexp.MustCompile(`(?m)^BREAKING CHANGE:`)
-
+func determineBumpType(commitMessages []string, bumpConfig BumpConfig) BumpType {
 	bumpType := NoBump
 
 	for _, message := range commitMessages {
-		switch {
-		case breakingChangeRegex.MatchString(message):
-			bumpType = MajorBump
+		for _, pattern := range bumpConfig.Bumps.MajorPatterns {
+			if regexp.MustCompile(pattern).MatchString(message) {
+				log.WithField("commitMessage", message).Info("Detected bump type: MAJOR")
 
-			log.Info("Detected bump type: MAJOR")
-		case featRegex.MatchString(message):
-			if bumpType < MinorBump {
-				bumpType = MinorBump
-
-				log.Info("Detected bump type: MINOR")
+				return MajorBump
 			}
-		case fixRegex.MatchString(message):
-			if bumpType < PatchBump {
-				bumpType = PatchBump
+		}
 
-				log.Info("Detected bump type: PATCH")
+		for _, pattern := range bumpConfig.Bumps.MinorPatterns {
+			if regexp.MustCompile(pattern).MatchString(message) {
+				if bumpType < MinorBump {
+					log.WithField("commitMessage", message).Info("Detected bump type: MINOR")
+
+					bumpType = MinorBump
+				}
+			}
+		}
+
+		for _, pattern := range bumpConfig.Bumps.PatchPatterns {
+			if regexp.MustCompile(pattern).MatchString(message) {
+				if bumpType < PatchBump {
+					log.WithField("commitMessage", message).Info("Detected bump type: PATCH")
+
+					bumpType = PatchBump
+				}
 			}
 		}
 	}

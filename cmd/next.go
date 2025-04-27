@@ -18,12 +18,14 @@ import (
 func NewNextCmd(git GitInterface, repoDirectoryPath *string) *cobra.Command {
 	var noNextVersionExitCode int
 
+	var configPath string
+
 	nextCmd := &cobra.Command{
 		Use:   "next",
 		Short: "Calculate the next version",
 		Long:  "Calculate the next version in the format MAJOR.MINOR.PATCH",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			err := HandleNextCommand(cmd.OutOrStdout(), git, repoDirectoryPath, noLatestVersionExitCode)
+			err := HandleNextCommand(cmd.OutOrStdout(), git, repoDirectoryPath, noNextVersionExitCode, configPath)
 			if err != nil {
 				return fmt.Errorf("error while running next command: %w", err)
 			}
@@ -34,6 +36,8 @@ func NewNextCmd(git GitInterface, repoDirectoryPath *string) *cobra.Command {
 
 	nextCmd.Flags().
 		IntVarP(&noNextVersionExitCode, "exit-code", "e", 0, "The exit code to use when no next version is found")
+	nextCmd.Flags().
+		StringVarP(&configPath, "config-path", "c", ".verscout-config.yaml", "The path to the verscout config file")
 
 	return nextCmd
 }
@@ -41,7 +45,23 @@ func NewNextCmd(git GitInterface, repoDirectoryPath *string) *cobra.Command {
 // HandleNextCommand performs the version calculation logic for the next command.
 // It retrieves the latest version tag, analyzes commit messages since that tag,
 // and calculates the next version based on semantic versioning rules.
-func HandleNextCommand(writer io.Writer, git GitInterface, repoDirectoryPath *string, noNextVersionExitCode int) error {
+func HandleNextCommand(
+	writer io.Writer,
+	git GitInterface,
+	repoDirectoryPath *string,
+	noNextVersionExitCode int,
+	configPath string,
+) error {
+	config, err := semverutils.LoadBumpConfigFromFile(configPath)
+	if err != nil {
+		log.Warnf("Failed to load config file: %v", err)
+		log.Info("Using default config")
+
+		config = semverutils.DefaultBumpConfig
+	}
+
+	log.WithField("configFile", configPath).Info("Using config file")
+
 	repository, err := git.PlainOpen(*repoDirectoryPath)
 	if err != nil {
 		return fmt.Errorf("failed to open repository: %w", err)
@@ -77,7 +97,7 @@ func HandleNextCommand(writer io.Writer, git GitInterface, repoDirectoryPath *st
 		return fmt.Errorf("failed to get commit messages since tag: %w", err)
 	}
 
-	nextVersion, err := semverutils.CalculateNextVersion(tagInfo.Name, commitMessagesSinceTag)
+	nextVersion, err := semverutils.CalculateNextVersion(tagInfo.Name, commitMessagesSinceTag, config)
 	if errors.Is(err, semverutils.ErrNoBump) {
 		if noNextVersionExitCode != 0 {
 			return &ExitError{Code: noNextVersionExitCode, Err: err}
