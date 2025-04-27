@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestHandleNextCommand_NoExistingTags(t *testing.T) {
+func TestHandleNextCommand_NoExistingTags_DefaultFirstVersion(t *testing.T) {
 	t.Parallel()
 
 	repo, err := gitutils.CreateTestRepo()
@@ -24,10 +24,42 @@ func TestHandleNextCommand_NoExistingTags(t *testing.T) {
 
 	var output bytes.Buffer
 
-	err = HandleNextCommand(&output, &gitutils.MockGit{Repo: repo}, &repoDirectoryPath, 0, ".verscout-config.yaml")
+	err = HandleNextCommand(
+		&output,
+		&gitutils.MockGit{Repo: repo},
+		&repoDirectoryPath,
+		0,
+		".verscout-config.yaml",
+		"1.0.0",
+	)
 	require.NoError(t, err)
 
 	assert.Equal(t, "1.0.0\n", output.String())
+}
+
+func TestHandleNextCommand_NoExistingTags_CustomFirstVersion(t *testing.T) {
+	t.Parallel()
+
+	repo, err := gitutils.CreateTestRepo()
+	require.NoError(t, err)
+	_, err = gitutils.CreateTestCommit(repo, "First commit", "README.md", "Hello, World!", time.Now())
+	require.NoError(t, err)
+
+	repoDirectoryPath := "."
+
+	var output bytes.Buffer
+
+	err = HandleNextCommand(
+		&output,
+		&gitutils.MockGit{Repo: repo},
+		&repoDirectoryPath,
+		0,
+		".verscout-config.yaml",
+		"0.1.0",
+	)
+	require.NoError(t, err)
+
+	assert.Equal(t, "0.1.0\n", output.String())
 }
 
 func TestHandleNextCommand_ValidExistingTag(t *testing.T) {
@@ -52,7 +84,14 @@ func TestHandleNextCommand_ValidExistingTag(t *testing.T) {
 
 	var output bytes.Buffer
 
-	err = HandleNextCommand(&output, &gitutils.MockGit{Repo: repo}, &repoDirectoryPath, 0, ".verscout-config.yaml")
+	err = HandleNextCommand(
+		&output,
+		&gitutils.MockGit{Repo: repo},
+		&repoDirectoryPath,
+		0,
+		".verscout-config.yaml",
+		"1.0.0",
+	)
 	require.NoError(t, err)
 
 	assert.Equal(t, "1.0.1\n", output.String())
@@ -80,7 +119,14 @@ func TestHandleNextCommand_ValidExistingTagWithVPrefix(t *testing.T) {
 
 	var output bytes.Buffer
 
-	err = HandleNextCommand(&output, &gitutils.MockGit{Repo: repo}, &repoDirectoryPath, 0, ".verscout-config.yaml")
+	err = HandleNextCommand(
+		&output,
+		&gitutils.MockGit{Repo: repo},
+		&repoDirectoryPath,
+		0,
+		".verscout-config.yaml",
+		"1.0.0",
+	)
 	require.NoError(t, err)
 
 	assert.Equal(t, "1.0.1\n", output.String())
@@ -108,7 +154,14 @@ func TestHandleNextCommand_InvalidExistingTag(t *testing.T) {
 
 	var output bytes.Buffer
 
-	err = HandleNextCommand(&output, &gitutils.MockGit{Repo: repo}, &repoDirectoryPath, 0, ".verscout-config.yaml")
+	err = HandleNextCommand(
+		&output,
+		&gitutils.MockGit{Repo: repo},
+		&repoDirectoryPath,
+		0,
+		".verscout-config.yaml",
+		"1.0.0",
+	)
 	require.NoError(t, err)
 
 	assert.Equal(t, "1.0.0\n", output.String())
@@ -136,7 +189,14 @@ func TestHandleNextCommand_MajorBump(t *testing.T) {
 
 	var output bytes.Buffer
 
-	err = HandleNextCommand(&output, &gitutils.MockGit{Repo: repo}, &repoDirectoryPath, 0, ".verscout-config.yaml")
+	err = HandleNextCommand(
+		&output,
+		&gitutils.MockGit{Repo: repo},
+		&repoDirectoryPath,
+		0,
+		".verscout-config.yaml",
+		"1.0.0",
+	)
 	require.NoError(t, err)
 
 	assert.Equal(t, "2.0.0\n", output.String())
@@ -164,7 +224,14 @@ func TestHandleNextCommand_MinorBump(t *testing.T) {
 
 	var output bytes.Buffer
 
-	err = HandleNextCommand(&output, &gitutils.MockGit{Repo: repo}, &repoDirectoryPath, 0, ".verscout-config.yaml")
+	err = HandleNextCommand(
+		&output,
+		&gitutils.MockGit{Repo: repo},
+		&repoDirectoryPath,
+		0,
+		".verscout-config.yaml",
+		"1.0.0",
+	)
 	require.NoError(t, err)
 
 	assert.Equal(t, "1.1.0\n", output.String())
@@ -192,7 +259,14 @@ func TestHandleNextCommand_NoBumpChore(t *testing.T) {
 
 	var output bytes.Buffer
 
-	err = HandleNextCommand(&output, &gitutils.MockGit{Repo: repo}, &repoDirectoryPath, 0, ".verscout-config.yaml")
+	err = HandleNextCommand(
+		&output,
+		&gitutils.MockGit{Repo: repo},
+		&repoDirectoryPath,
+		0,
+		".verscout-config.yaml",
+		"1.0.0",
+	)
 	require.NoError(t, err)
 
 	assert.Empty(t, output.String())
@@ -212,7 +286,14 @@ func TestHandleNextCommand_NoBumpNoAdditionalCommits(t *testing.T) {
 
 	var output bytes.Buffer
 
-	err = HandleNextCommand(&output, &gitutils.MockGit{Repo: repo}, &repoDirectoryPath, 0, ".verscout-config.yaml")
+	err = HandleNextCommand(
+		&output,
+		&gitutils.MockGit{Repo: repo},
+		&repoDirectoryPath,
+		0,
+		".verscout-config.yaml",
+		"1.0.0",
+	)
 	require.NoError(t, err)
 
 	assert.Empty(t, output.String())
@@ -240,7 +321,14 @@ func TestHandleNextCommand_AnnotatedExistingTag(t *testing.T) {
 
 	var output bytes.Buffer
 
-	err = HandleNextCommand(&output, &gitutils.MockGit{Repo: repo}, &repoDirectoryPath, 0, ".verscout-config.yaml")
+	err = HandleNextCommand(
+		&output,
+		&gitutils.MockGit{Repo: repo},
+		&repoDirectoryPath,
+		0,
+		".verscout-config.yaml",
+		"1.0.0",
+	)
 	require.NoError(t, err)
 
 	assert.Equal(t, "1.0.1\n", output.String())
@@ -260,7 +348,14 @@ func TestHandleNextCommand_NoNextVersionExitCode_NoNewCommits(t *testing.T) {
 
 	var output bytes.Buffer
 
-	err = HandleNextCommand(&output, &gitutils.MockGit{Repo: repo}, &repoDirectoryPath, 2, ".verscout-config.yaml")
+	err = HandleNextCommand(
+		&output,
+		&gitutils.MockGit{Repo: repo},
+		&repoDirectoryPath,
+		2,
+		".verscout-config.yaml",
+		"1.0.0",
+	)
 	require.Error(t, err)
 
 	var exitErr *ExitError
@@ -291,7 +386,14 @@ func TestHandleNextCommand_NoNextVersionExitCode_NoBumpCommits(t *testing.T) {
 
 	var output bytes.Buffer
 
-	err = HandleNextCommand(&output, &gitutils.MockGit{Repo: repo}, &repoDirectoryPath, 2, ".verscout-config.yaml")
+	err = HandleNextCommand(
+		&output,
+		&gitutils.MockGit{Repo: repo},
+		&repoDirectoryPath,
+		2,
+		".verscout-config.yaml",
+		"1.0.0",
+	)
 	require.Error(t, err)
 
 	var exitErr *ExitError
@@ -322,7 +424,14 @@ func TestHandleNextCommand_NoNextVersionExitCode_FixCommit(t *testing.T) {
 
 	var output bytes.Buffer
 
-	err = HandleNextCommand(&output, &gitutils.MockGit{Repo: repo}, &repoDirectoryPath, 2, ".verscout-config.yaml")
+	err = HandleNextCommand(
+		&output,
+		&gitutils.MockGit{Repo: repo},
+		&repoDirectoryPath,
+		2,
+		".verscout-config.yaml",
+		"1.0.0",
+	)
 	require.NoError(t, err)
 
 	assert.Equal(t, "1.0.1\n", output.String())
@@ -374,7 +483,7 @@ bumps:
 
 	repoPath := "."
 
-	err = HandleNextCommand(&output, &gitutils.MockGit{Repo: repo}, &repoPath, 0, configPath)
+	err = HandleNextCommand(&output, &gitutils.MockGit{Repo: repo}, &repoPath, 0, configPath, "1.0.0")
 	require.NoError(t, err)
 	assert.Equal(t, "2.0.0\n", output.String())
 }
@@ -402,7 +511,7 @@ func TestHandleNextCommand_InvalidConfig(t *testing.T) {
 
 	repoPath := "."
 
-	err = HandleNextCommand(&output, &gitutils.MockGit{Repo: repo}, &repoPath, 0, configPath)
+	err = HandleNextCommand(&output, &gitutils.MockGit{Repo: repo}, &repoPath, 0, configPath, "1.0.0")
 	require.NoError(t, err)
 	assert.Equal(t, "1.0.1\n", output.String())
 }

@@ -97,6 +97,9 @@ Using the default configuration, `fix:` will cause a `PATCH` bump, `feat:` will 
 and `BREAKING CHANGE:` in the commit message body will cause a `MAJOR` bump.
 This behavior can be [configured](#custom-bump-configuration)
 
+If no version tags exist, the first version will be `1.0.0`
+This behavior can also be [configured](#custom-first-version)
+
 ### Configure `verscout`
 
 To get a complete list of the configuration options, please use the `--help` or `-h` flag.
@@ -159,6 +162,19 @@ You can also specify a different file path:
 ```shell
 verscout next --config path/to/your/config.yaml
 ```
+
+##### Custom First Version
+
+By default, if no version tags exist, the first version will be `1.0.0`.
+You can configure this behavior:
+
+```shell
+verscout next --first-version 0.1.0
+```
+
+Be aware that this will have no effect on the keywords and the type of bump they cause.
+For example, if you want the keyword `BREAKING CHANGE:` to not cause a bump from `0.1.0` to `1.0.0`, you should
+use a [custom bump configuration](#custom-bump-configuration).
 
 ##### Exit Code if no next version is found
 

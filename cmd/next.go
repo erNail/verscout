@@ -20,12 +20,21 @@ func NewNextCmd(git GitInterface, repoDirectoryPath *string) *cobra.Command {
 
 	var configPath string
 
+	var firstVersion string
+
 	nextCmd := &cobra.Command{
 		Use:   "next",
 		Short: "Calculate the next version",
 		Long:  "Calculate the next version in the format MAJOR.MINOR.PATCH",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			err := HandleNextCommand(cmd.OutOrStdout(), git, repoDirectoryPath, noNextVersionExitCode, configPath)
+			err := HandleNextCommand(
+				cmd.OutOrStdout(),
+				git,
+				repoDirectoryPath,
+				noNextVersionExitCode,
+				configPath,
+				firstVersion,
+			)
 			if err != nil {
 				return fmt.Errorf("error while running next command: %w", err)
 			}
@@ -38,6 +47,8 @@ func NewNextCmd(git GitInterface, repoDirectoryPath *string) *cobra.Command {
 		IntVarP(&noNextVersionExitCode, "exit-code", "e", 0, "The exit code to use when no next version is found")
 	nextCmd.Flags().
 		StringVarP(&configPath, "config-path", "c", ".verscout-config.yaml", "The path to the verscout config file")
+	nextCmd.Flags().
+		StringVarP(&firstVersion, "first-version", "f", "1.0.0", "The first version to use if no previous version tags exist")
 
 	return nextCmd
 }
@@ -51,6 +62,7 @@ func HandleNextCommand(
 	repoDirectoryPath *string,
 	noNextVersionExitCode int,
 	configPath string,
+	firstVersion string,
 ) error {
 	config, err := semverutils.LoadBumpConfigFromFile(configPath)
 	if err != nil {
@@ -69,12 +81,10 @@ func HandleNextCommand(
 
 	tagInfo, err := gitutils.GetLatestVersionTag(repository)
 	if err != nil {
-		defaultVersion := "1.0.0"
-
 		log.Warnf("No version tags found: %v", err)
-		log.WithField("defaultVersion", defaultVersion).Info("Using default version")
+		log.WithField("firstVersion", firstVersion).Info("Using provided first version")
 
-		_, err = fmt.Fprintln(writer, defaultVersion)
+		_, err = fmt.Fprintln(writer, firstVersion)
 		if err != nil {
 			return fmt.Errorf("failed to write version: %w", err)
 		}
