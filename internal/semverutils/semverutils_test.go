@@ -127,3 +127,11 @@ func TestCalculateNextVersion_NoCommits(t *testing.T) {
 	require.ErrorIs(t, err, ErrNoCommitsFound)
 	assert.Empty(t, nextVersion)
 }
+
+func TestCalculateNextVersion_InvalidSemVerTag(t *testing.T) {
+	t.Parallel()
+
+	nextVersion, err := CalculateNextVersion("invalid", []string{"fix: bug fix"})
+	require.ErrorIs(t, err, ErrInvalidSemVerTag)
+	assert.Empty(t, nextVersion)
+}
