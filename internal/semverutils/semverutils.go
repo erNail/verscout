@@ -20,8 +20,6 @@ var (
 	ErrNoBump = errors.New("no conventional commits found that affect the version")
 	// ErrInvalidSemVerTag is returned when a version tag doesn't follow semantic versioning format.
 	ErrInvalidSemVerTag = errors.New("invalid semantic version tag")
-	// ErrInvalidCommitFormat is returned when a commit message doesn't follow conventional commit format.
-	ErrInvalidCommitFormat = errors.New("invalid conventional commit format")
 )
 
 // SemVer represents a semantic version with major, minor, and patch components.
