@@ -143,7 +143,6 @@ func applyBump(semVer SemVer, bumpType BumpType) SemVer {
 	case PatchBump:
 		semVer.Patch++
 	case NoBump:
-		// No changes
 	}
 
 	return semVer
