@@ -93,9 +93,8 @@ verscout next
 For verscout to calculate the next version,
 [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) need to exist since the latest version tag.
 
-In the default configuration, using `fix:` will cause a `PATCH` bump,
-using `feat:` will cause a `MINOR` bump,
-and using `BREAKING CHANGE:` in the commit message body will cause a `MAJOR` bump.
+Using the default configuration, `fix:` will cause a `PATCH` bump, `feat:` will cause a `MINOR` bump,
+and `BREAKING CHANGE:` in the commit message body will cause a `MAJOR` bump.
 This behavior can be [configured](#custom-bump-configuration)
 
 ### Configure `verscout`
@@ -176,12 +175,12 @@ You can change this behavior with the `--exit-code` flag
 verscout next --exit-code 4
 ```
 
-### Limitations
+## Limitations
 
 - The format of the version tags is currently not configurable
 - Bumping any prerelease or release candidate versions is not supported
 
-## Planned Features and Limitations
+## Planned Features
 
 Please check the open [GitHub Issues](https://github.com/erNail/homebrew-tap/issues)
 to get an overview of the planned features.
