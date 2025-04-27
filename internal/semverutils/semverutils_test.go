@@ -64,7 +64,7 @@ func TestSemVerString(t *testing.T) {
 func TestCalculateNextVersion_BugFix(t *testing.T) {
 	t.Parallel()
 
-	nextVersion, err := CalculateNextVersion("1.0.0", []string{"fix: bug fix"})
+	nextVersion, err := CalculateNextVersion("1.0.0", []string{"fix: bug fix"}, DefaultBumpConfig)
 	require.NoError(t, err)
 	assert.Equal(t, "1.0.1", nextVersion)
 }
@@ -72,7 +72,7 @@ func TestCalculateNextVersion_BugFix(t *testing.T) {
 func TestCalculateNextVersion_NewFeature(t *testing.T) {
 	t.Parallel()
 
-	nextVersion, err := CalculateNextVersion("1.0.0", []string{"feat: new feature"})
+	nextVersion, err := CalculateNextVersion("1.0.0", []string{"feat: new feature"}, DefaultBumpConfig)
 	require.NoError(t, err)
 	assert.Equal(t, "1.1.0", nextVersion)
 }
@@ -80,7 +80,7 @@ func TestCalculateNextVersion_NewFeature(t *testing.T) {
 func TestCalculateNextVersion_BugFixAndNewFeature(t *testing.T) {
 	t.Parallel()
 
-	nextVersion, err := CalculateNextVersion("1.0.0", []string{"fix: bug fix", "feat: new feature"})
+	nextVersion, err := CalculateNextVersion("1.0.0", []string{"fix: bug fix", "feat: new feature"}, DefaultBumpConfig)
 	require.NoError(t, err)
 	assert.Equal(t, "1.1.0", nextVersion)
 }
@@ -88,7 +88,11 @@ func TestCalculateNextVersion_BugFixAndNewFeature(t *testing.T) {
 func TestCalculateNextVersion_BugFixAndBreakingChange(t *testing.T) {
 	t.Parallel()
 
-	nextVersion, err := CalculateNextVersion("1.0.0", []string{"fix: bug fix\n\nBREAKING CHANGE: major update"})
+	nextVersion, err := CalculateNextVersion(
+		"1.0.0",
+		[]string{"fix: bug fix\n\nBREAKING CHANGE: major update"},
+		DefaultBumpConfig,
+	)
 	require.NoError(t, err)
 	assert.Equal(t, "2.0.0", nextVersion)
 }
@@ -96,7 +100,11 @@ func TestCalculateNextVersion_BugFixAndBreakingChange(t *testing.T) {
 func TestCalculateNextVersion_NewFeatureAndBreakingChange(t *testing.T) {
 	t.Parallel()
 
-	nextVersion, err := CalculateNextVersion("1.0.0", []string{"feat: new feature\n\nBREAKING CHANGE: major update"})
+	nextVersion, err := CalculateNextVersion(
+		"1.0.0",
+		[]string{"feat: new feature\n\nBREAKING CHANGE: major update"},
+		DefaultBumpConfig,
+	)
 	require.NoError(t, err)
 	assert.Equal(t, "2.0.0", nextVersion)
 }
@@ -107,15 +115,89 @@ func TestCalculateNextVersion_BugFixNewFeatureAndBreakingChange(t *testing.T) {
 	nextVersion, err := CalculateNextVersion("1.0.0", []string{
 		"fix: bug fix",
 		"feat: new feature\n\nBREAKING CHANGE: major update",
-	})
+	}, DefaultBumpConfig)
 	require.NoError(t, err)
 	assert.Equal(t, "2.0.0", nextVersion)
+}
+
+func TestCalculateNextVersion_CustomConfig_BugFixAndBreakingChange(t *testing.T) {
+	t.Parallel()
+
+	bumpConfig := BumpConfig{
+		Bumps: BumpPatterns{
+			MajorPatterns: []string{
+				`(?m)^BREAK:`,
+			},
+			MinorPatterns: []string{
+				`^feat(\(.*\))?:`,
+			},
+			PatchPatterns: []string{
+				`^fix(\(.*\))?:`,
+			},
+		},
+	}
+
+	nextVersion, err := CalculateNextVersion("1.0.0", []string{
+		"fix: bug fix",
+		"feat: new feature\n\nBREAK: major update",
+	}, bumpConfig)
+	require.NoError(t, err)
+	assert.Equal(t, "2.0.0", nextVersion)
+}
+
+func TestCalculateNextVersion_CustomConfig_BugFixAndFeature(t *testing.T) {
+	t.Parallel()
+
+	bumpConfig := BumpConfig{
+		Bumps: BumpPatterns{
+			MajorPatterns: []string{
+				`(?m)^BREAK:`,
+			},
+			MinorPatterns: []string{
+				`^feature(\(.*\))?:`,
+			},
+			PatchPatterns: []string{
+				`^patch(\(.*\))?:`,
+			},
+		},
+	}
+
+	nextVersion, err := CalculateNextVersion("1.0.0", []string{
+		"patch: bug fix",
+		"feature: new feature",
+	}, bumpConfig)
+	require.NoError(t, err)
+	assert.Equal(t, "1.1.0", nextVersion)
+}
+
+func TestCalculateNextVersion_CustomConfig_BugFix(t *testing.T) {
+	t.Parallel()
+
+	bumpConfig := BumpConfig{
+		Bumps: BumpPatterns{
+			MajorPatterns: []string{
+				`(?m)^BREAK:`,
+			},
+			MinorPatterns: []string{
+				`^feature(\(.*\))?:`,
+			},
+			PatchPatterns: []string{
+				`^patch(\(.*\))?:`,
+			},
+		},
+	}
+
+	nextVersion, err := CalculateNextVersion("1.0.0", []string{
+		"patch: bug fix",
+	}, bumpConfig)
+	require.NoError(t, err)
+	assert.Equal(t, "1.0.1", nextVersion)
 }
 
 func TestCalculateNextVersion_ChoreCommit(t *testing.T) {
 	t.Parallel()
 
-	nextVersion, err := CalculateNextVersion("1.0.0", []string{"chore: update readme"})
+	nextVersion, err := CalculateNextVersion("1.0.0", []string{"chore: update readme"}, DefaultBumpConfig)
 	require.ErrorIs(t, err, ErrNoBump)
 	assert.Empty(t, nextVersion)
 }
@@ -123,7 +205,7 @@ func TestCalculateNextVersion_ChoreCommit(t *testing.T) {
 func TestCalculateNextVersion_NoCommits(t *testing.T) {
 	t.Parallel()
 
-	nextVersion, err := CalculateNextVersion("1.0.0", []string{})
+	nextVersion, err := CalculateNextVersion("1.0.0", []string{}, DefaultBumpConfig)
 	require.ErrorIs(t, err, ErrNoCommitsFound)
 	assert.Empty(t, nextVersion)
 }
@@ -131,7 +213,7 @@ func TestCalculateNextVersion_NoCommits(t *testing.T) {
 func TestCalculateNextVersion_InvalidSemVerTag(t *testing.T) {
 	t.Parallel()
 
-	nextVersion, err := CalculateNextVersion("invalid", []string{"fix: bug fix"})
+	nextVersion, err := CalculateNextVersion("invalid", []string{"fix: bug fix"}, DefaultBumpConfig)
 	require.ErrorIs(t, err, ErrInvalidSemVerTag)
 	assert.Empty(t, nextVersion)
 }
