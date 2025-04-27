@@ -182,7 +182,7 @@ verscout next --exit-code 4
 
 ## Planned Features
 
-Please check the open [GitHub Issues](https://github.com/erNail/homebrew-tap/issues)
+Please check the open [GitHub Issues](https://github.com/erNail/verscout/issues)
 to get an overview of the planned features.
 
 ## Development
