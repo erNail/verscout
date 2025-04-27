@@ -51,7 +51,7 @@ func IsValidSemVerTag(semVerString string) bool {
 }
 
 // ExtractSemVerStruct parses a version tag string and returns a SemVer struct.
-// It returns an error if the string is not a valid semantic version.
+// Returns ErrInvalidSemVerTag if the tag does not follow semantic versioning format.
 func ExtractSemVerStruct(versionTag string) (*SemVer, error) {
 	if !IsValidSemVerTag(versionTag) {
 		return nil, ErrInvalidSemVerTag
@@ -80,7 +80,7 @@ func (semVer *SemVer) String() string {
 // and a list of commit messages following conventional commit format.
 // Returns ErrNoCommitsFound if the commit list is empty.
 // Returns ErrNoBump if no version bump is required.
-// Returns ErrInvalidCommitFormat if a commit message doesn't follow the conventional format.
+// Returns ErrInvalidSemVerTag if the tag does not follow semantic versioning format.
 func CalculateNextVersion(versionTag string, commitMessages []string) (string, error) {
 	if len(commitMessages) == 0 {
 		return "", ErrNoCommitsFound
@@ -88,6 +88,7 @@ func CalculateNextVersion(versionTag string, commitMessages []string) (string, e
 
 	semVer, err := ExtractSemVerStruct(versionTag)
 	if err != nil {
+		// Error type could be ErrInvalidSemVerTag
 		return "", fmt.Errorf("failed to extract SemVer struct: %w", err)
 	}
 
