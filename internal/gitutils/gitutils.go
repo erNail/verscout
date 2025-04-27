@@ -72,6 +72,7 @@ func GetCommitFromTag(repo *git.Repository, tagRef *plumbing.Reference) (*object
 }
 
 // GetTagsWithTimestamps returns all tags in the repository with their associated timestamps.
+// Returns ErrNoTags if no tags are found.
 func GetTagsWithTimestamps(repo *git.Repository) ([]TagInfo, error) {
 	var tagsInfo []TagInfo
 
@@ -108,9 +109,12 @@ func GetTagsWithTimestamps(repo *git.Repository) ([]TagInfo, error) {
 }
 
 // GetLatestVersionTag finds the most recent semantic version tag in the repository.
+// Returns ErrNoValidVersionTags if no valid version tags are found.
+// Returns ErrNoTags if no tags are found in the repository.
 func GetLatestVersionTag(repo *git.Repository) (*TagInfo, error) {
 	tags, err := GetTagsWithTimestamps(repo)
 	if err != nil {
+		// Error type could be ErrNoTags
 		return nil, fmt.Errorf("failed to get tags with timestamps: %w", err)
 	}
 
@@ -134,9 +138,12 @@ func GetLatestVersionTag(repo *git.Repository) (*TagInfo, error) {
 }
 
 // GetLatestVersion returns the latest semantic version as a SemVer struct.
+// Returns ErrNoTags if no tags are found.
+// Returns ErrNoValidVersionTags if no valid version tags are found.
 func GetLatestVersion(repo *git.Repository) (*semverutils.SemVer, error) {
 	latestTag, err := GetLatestVersionTag(repo)
 	if err != nil {
+		// Error type could be ErrNoValidVersionTags or ErrNoTags
 		return nil, fmt.Errorf("failed to get latest version tag: %w", err)
 	}
 
@@ -149,6 +156,7 @@ func GetLatestVersion(repo *git.Repository) (*semverutils.SemVer, error) {
 }
 
 // GetCommitsSinceCommitHash returns all commits made after the specified commit hash.
+// Returns ErrNoCommitsFound if no commits are found.
 func GetCommitsSinceCommitHash(
 	repo *git.Repository,
 	commitHash plumbing.Hash,
@@ -192,12 +200,14 @@ func GetCommitsSinceCommitHash(
 }
 
 // GetCommitMessagesSinceCommitHash returns the commit messages for all commits made after the specified commit hash.
+// Returns ErrNoCommitsFound if no commits are found.
 func GetCommitMessagesSinceCommitHash(
 	repo *git.Repository,
 	commitHash plumbing.Hash,
 ) ([]string, error) {
 	commits, err := GetCommitsSinceCommitHash(repo, commitHash)
 	if err != nil {
+		// Error type could be ErrNoCommitsFound
 		return nil, fmt.Errorf("failed to get commits since commit hash: %w", err)
 	}
 
