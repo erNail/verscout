@@ -20,12 +20,7 @@ module.exports = {
   labels: ["renovate"],
   username: "renovate-bot",
   gitAuthor: "Renovate Bot <bot@renovateapp.com>",
-  dependencyDashboard: true,
-  dependencyDashboardLabels: ["renovate"],
   cachePrivatePackages: true,
-  reviewers: [
-    "ernail",
-  ],
   packageRules: [
     {
       matchPackagePatterns: [
