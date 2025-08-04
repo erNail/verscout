@@ -14,6 +14,7 @@ linters:
     - "gochecknoglobals"
     - "testpackage"
     - "cyclop"
+    - "wsl"
   settings:
     mnd:
       ignored-numbers:
