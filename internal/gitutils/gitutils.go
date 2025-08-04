@@ -166,7 +166,10 @@ func GetCommitsSinceCommitHash(
 		return nil, fmt.Errorf("failed to get HEAD: %w", err)
 	}
 
-	commitIter, err := repo.Log(&git.LogOptions{From: ref.Hash()}) // Start from HEAD
+	commitIter, err := repo.Log(&git.LogOptions{
+		From:  ref.Hash(),
+		Order: git.LogOrderCommitterTime,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get commit log: %w", err)
 	}
