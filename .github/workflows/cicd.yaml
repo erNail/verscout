@@ -11,7 +11,7 @@ jobs:
       - name: "Check out repository"
         uses: "actions/checkout@v4.3.0"
       - name: "Setup python"
-        uses: "actions/setup-python@v5.6.0"
+        uses: "actions/setup-python@v6.0.0"
       - name: "Run pre-commit"
         uses: "pre-commit/action@v3.0.1"
 
