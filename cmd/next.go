@@ -92,7 +92,7 @@ func HandleNextCommand(
 		return nil
 	}
 
-	commitMessagesSinceTag, err := gitutils.GetCommitMessagesSinceCommitHash(repository, tagInfo.TagRef.Hash())
+	commitMessagesSinceTag, err := gitutils.GetCommitMessagesSinceCommitHash(repository, tagInfo.Commit.Hash)
 	if errors.Is(err, gitutils.ErrNoCommitsFound) {
 		log.Infof("No commits found since the latest version tag: %v", err)
 

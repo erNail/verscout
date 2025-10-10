@@ -67,7 +67,7 @@ func TestHandleNextCommand_ValidExistingTag(t *testing.T) {
 
 	repo, err := gitutils.CreateTestRepo()
 	require.NoError(t, err)
-	commitHash, err := gitutils.CreateTestCommit(repo, "First commit", "README.md", "Hello, World!", time.Now())
+	commitHash, err := gitutils.CreateTestCommit(repo, "feat: First commit", "README.md", "Hello, World!", time.Now())
 	require.NoError(t, err)
 	_, err = gitutils.CreateTag(repo, "1.0.0", commitHash)
 	require.NoError(t, err)
@@ -102,7 +102,7 @@ func TestHandleNextCommand_ValidExistingTagWithVPrefix(t *testing.T) {
 
 	repo, err := gitutils.CreateTestRepo()
 	require.NoError(t, err)
-	commitHash, err := gitutils.CreateTestCommit(repo, "First commit", "README.md", "Hello, World!", time.Now())
+	commitHash, err := gitutils.CreateTestCommit(repo, "feat: First commit", "README.md", "Hello, World!", time.Now())
 	require.NoError(t, err)
 	_, err = gitutils.CreateTag(repo, "v1.0.0", commitHash)
 	require.NoError(t, err)
@@ -137,7 +137,7 @@ func TestHandleNextCommand_InvalidExistingTag(t *testing.T) {
 
 	repo, err := gitutils.CreateTestRepo()
 	require.NoError(t, err)
-	commitHash, err := gitutils.CreateTestCommit(repo, "First commit", "README.md", "Hello, World!", time.Now())
+	commitHash, err := gitutils.CreateTestCommit(repo, "feat: First commit", "README.md", "Hello, World!", time.Now())
 	require.NoError(t, err)
 	_, err = gitutils.CreateTag(repo, "invalid-tag", commitHash)
 	require.NoError(t, err)
@@ -172,7 +172,7 @@ func TestHandleNextCommand_MajorBump(t *testing.T) {
 
 	repo, err := gitutils.CreateTestRepo()
 	require.NoError(t, err)
-	commitHash, err := gitutils.CreateTestCommit(repo, "First commit", "README.md", "Hello, World!", time.Now())
+	commitHash, err := gitutils.CreateTestCommit(repo, "feat: First commit", "README.md", "Hello, World!", time.Now())
 	require.NoError(t, err)
 	_, err = gitutils.CreateTag(repo, "1.0.0", commitHash)
 	require.NoError(t, err)
@@ -207,7 +207,7 @@ func TestHandleNextCommand_MinorBump(t *testing.T) {
 
 	repo, err := gitutils.CreateTestRepo()
 	require.NoError(t, err)
-	commitHash, err := gitutils.CreateTestCommit(repo, "First commit", "README.md", "Hello, World!", time.Now())
+	commitHash, err := gitutils.CreateTestCommit(repo, "feat: First commit", "README.md", "Hello, World!", time.Now())
 	require.NoError(t, err)
 	_, err = gitutils.CreateTag(repo, "1.0.0", commitHash)
 	require.NoError(t, err)
@@ -242,7 +242,7 @@ func TestHandleNextCommand_NoBumpChore(t *testing.T) {
 
 	repo, err := gitutils.CreateTestRepo()
 	require.NoError(t, err)
-	commitHash, err := gitutils.CreateTestCommit(repo, "First commit", "README.md", "Hello, World!", time.Now())
+	commitHash, err := gitutils.CreateTestCommit(repo, "feat: First commit", "README.md", "Hello, World!", time.Now())
 	require.NoError(t, err)
 	_, err = gitutils.CreateTag(repo, "1.0.0", commitHash)
 	require.NoError(t, err)
@@ -339,7 +339,7 @@ func TestHandleNextCommand_NoNextVersionExitCode_NoNewCommits(t *testing.T) {
 
 	repo, err := gitutils.CreateTestRepo()
 	require.NoError(t, err)
-	commitHash, err := gitutils.CreateTestCommit(repo, "First commit", "README.md", "Hello, World!", time.Now())
+	commitHash, err := gitutils.CreateTestCommit(repo, "feat: First commit", "README.md", "Hello, World!", time.Now())
 	require.NoError(t, err)
 	_, err = gitutils.CreateAnnotatedTag(repo, "1.0.0", commitHash, "Annotated tag")
 	require.NoError(t, err)

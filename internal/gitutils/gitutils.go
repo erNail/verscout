@@ -20,11 +20,11 @@ var (
 	ErrNoTags = errors.New("no tags found")
 )
 
-// TagInfo holds information about a git tag including its name, timestamp, and reference.
+// TagInfo holds information about a git tag.
 type TagInfo struct {
-	Name     string
-	UnixTime int64
-	TagRef   *plumbing.Reference
+	Name   string
+	Commit *object.Commit
+	TagRef *plumbing.Reference
 }
 
 // getCommitTimestamp retrieves the Unix timestamp of a commit given its hash.
@@ -71,9 +71,9 @@ func GetCommitFromTag(repo *git.Repository, tagRef *plumbing.Reference) (*object
 	return nil, fmt.Errorf("failed to get tag object for tag %s: %w", tagRef.Name().Short(), err)
 }
 
-// GetTagsWithTimestamps returns all tags in the repository with their associated timestamps.
+// GetTagsWithAssociatedCommits returns all tags in the repository with their associated commits.
 // Returns ErrNoTags if no tags are found.
-func GetTagsWithTimestamps(repo *git.Repository) ([]TagInfo, error) {
+func GetTagsWithAssociatedCommits(repo *git.Repository) ([]TagInfo, error) {
 	var tagsInfo []TagInfo
 
 	tagRefs, err := repo.Tags()
@@ -91,8 +91,7 @@ func GetTagsWithTimestamps(repo *git.Repository) ([]TagInfo, error) {
 			)
 		}
 
-		commitTime := commit.Committer.When.Unix()
-		tagInfo := TagInfo{Name: tagRef.Name().Short(), UnixTime: commitTime, TagRef: tagRef}
+		tagInfo := TagInfo{Name: tagRef.Name().Short(), Commit: commit, TagRef: tagRef}
 		tagsInfo = append(tagsInfo, tagInfo)
 
 		return nil
@@ -112,7 +111,7 @@ func GetTagsWithTimestamps(repo *git.Repository) ([]TagInfo, error) {
 // Returns ErrNoValidVersionTags if no valid version tags are found.
 // Returns ErrNoTags if no tags are found in the repository.
 func GetLatestVersionTag(repo *git.Repository) (*TagInfo, error) {
-	tags, err := GetTagsWithTimestamps(repo)
+	tags, err := GetTagsWithAssociatedCommits(repo)
 	if err != nil {
 		// Error type could be ErrNoTags
 		return nil, fmt.Errorf("failed to get tags with timestamps: %w", err)
@@ -122,7 +121,7 @@ func GetLatestVersionTag(repo *git.Repository) (*TagInfo, error) {
 
 	for _, tag := range tags {
 		if semverutils.IsValidSemVerTag(tag.Name) {
-			if latestTag.Name == "" || tag.UnixTime > latestTag.UnixTime {
+			if latestTag.Name == "" || tag.Commit.Committer.When.Unix() > latestTag.Commit.Committer.When.Unix() {
 				latestTag = tag
 			}
 		}

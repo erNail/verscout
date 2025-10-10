@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGetTagsWithTimestamps_TwoTags(t *testing.T) {
+func TestGetTagsWithAssociatedCommits_TwoTags(t *testing.T) {
 	t.Parallel()
 
 	repo, err := CreateTestRepo()
@@ -34,26 +34,26 @@ func TestGetTagsWithTimestamps_TwoTags(t *testing.T) {
 	_, err = repo.CreateTag("1.0.1", commitHash, nil)
 	require.NoError(t, err)
 
-	tagsInfos, err := GetTagsWithTimestamps(repo)
+	tagsInfos, err := GetTagsWithAssociatedCommits(repo)
 	require.NoError(t, err)
 	assert.Len(t, tagsInfos, 2)
 	assert.Equal(t, "1.0.0", tagsInfos[0].Name)
 	assert.Equal(t, "1.0.1", tagsInfos[1].Name)
-	assert.NotEqual(t, tagsInfos[0].UnixTime, tagsInfos[1].UnixTime)
+	assert.NotEqual(t, tagsInfos[0].Commit.Committer.When.Unix(), tagsInfos[1].Commit.Committer.When.Unix())
 }
 
-func TestGetTagsWithTimestamps_NoTags(t *testing.T) {
+func TestGetTagsWithAssociatedCommits_NoTags(t *testing.T) {
 	t.Parallel()
 
 	repo, err := CreateTestRepo()
 	require.NoError(t, err)
 
-	tagsInfos, err := GetTagsWithTimestamps(repo)
+	tagsInfos, err := GetTagsWithAssociatedCommits(repo)
 	require.ErrorIs(t, err, ErrNoTags)
 	assert.Empty(t, tagsInfos)
 }
 
-func TestGetTagsWithTimestamps_AnnotatedTag(t *testing.T) {
+func TestGetTagsWithAssociatedCommits_AnnotatedTag(t *testing.T) {
 	t.Parallel()
 
 	repo, err := CreateTestRepo()
@@ -69,14 +69,14 @@ func TestGetTagsWithTimestamps_AnnotatedTag(t *testing.T) {
 	_, err = CreateAnnotatedTag(repo, "v1.0.0", commitHash, "Annotated tag")
 	require.NoError(t, err)
 
-	tagsInfos, err := GetTagsWithTimestamps(repo)
+	tagsInfos, err := GetTagsWithAssociatedCommits(repo)
 	require.NoError(t, err)
 	assert.Len(t, tagsInfos, 1)
 	assert.Equal(t, "v1.0.0", tagsInfos[0].Name)
-	assert.NotZero(t, tagsInfos[0].UnixTime)
+	assert.NotZero(t, tagsInfos[0].Commit.Committer.When.Unix())
 }
 
-func TestGetTagsWithTimestamps_LightweightTag(t *testing.T) {
+func TestGetTagsWithAssociatedCommits_LightweightTag(t *testing.T) {
 	t.Parallel()
 
 	repo, err := CreateTestRepo()
@@ -92,11 +92,11 @@ func TestGetTagsWithTimestamps_LightweightTag(t *testing.T) {
 	_, err = CreateTag(repo, "v1.0.0", commitHash)
 	require.NoError(t, err)
 
-	tagsInfos, err := GetTagsWithTimestamps(repo)
+	tagsInfos, err := GetTagsWithAssociatedCommits(repo)
 	require.NoError(t, err)
 	assert.Len(t, tagsInfos, 1)
 	assert.Equal(t, "v1.0.0", tagsInfos[0].Name)
-	assert.NotZero(t, tagsInfos[0].UnixTime)
+	assert.NotZero(t, tagsInfos[0].Commit.Committer.When.Unix())
 }
 
 func TestGetCommitTimestamp(t *testing.T) {
