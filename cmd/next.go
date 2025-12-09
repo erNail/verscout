@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/erNail/verscout/internal/gitutils"
 	"github.com/erNail/verscout/internal/semverutils"
@@ -66,7 +67,11 @@ func HandleNextCommand(
 ) error {
 	config, err := semverutils.LoadBumpConfigFromFile(configPath)
 	if err != nil {
-		log.Warnf("Failed to load config file: %v", err)
+		if !errors.Is(err, os.ErrNotExist) {
+			return fmt.Errorf("failed to load config file: %w", err)
+		}
+
+		log.Infof("Failed to load config file: %v", err)
 		log.Info("Using default config")
 
 		config = semverutils.DefaultBumpConfig

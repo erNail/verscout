@@ -512,6 +512,6 @@ func TestHandleNextCommand_InvalidConfig(t *testing.T) {
 	repoPath := "."
 
 	err = HandleNextCommand(&output, &gitutils.MockGit{Repo: repo}, &repoPath, 0, configPath, "1.0.0")
-	require.NoError(t, err)
-	assert.Equal(t, "1.0.1\n", output.String())
+	require.Error(t, err)
+	require.NotErrorIs(t, err, os.ErrNotExist)
 }
