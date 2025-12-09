@@ -45,7 +45,7 @@ func TestLoadBumpConfigFromFile_FileNotFound(t *testing.T) {
 	t.Parallel()
 
 	_, err := LoadBumpConfigFromFile("nonexistent.yaml")
-	assert.ErrorIs(t, err, os.ErrNotExist)
+	require.ErrorIs(t, err, os.ErrNotExist)
 }
 
 func TestLoadBumpConfigFromFile_InvalidYAML(t *testing.T) {
@@ -57,5 +57,6 @@ func TestLoadBumpConfigFromFile_InvalidYAML(t *testing.T) {
 	require.NoError(t, err, "failed to write temp yaml file")
 
 	_, err = LoadBumpConfigFromFile(tmpFile)
-	assert.Error(t, err)
+	require.Error(t, err)
+	require.NotErrorIs(t, err, os.ErrNotExist)
 }

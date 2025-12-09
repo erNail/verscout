@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
 
@@ -37,6 +38,8 @@ var DefaultBumpConfig = BumpConfig{
 
 // LoadBumpConfigFromFile loads a BumpConfig from a YAML file.
 func LoadBumpConfigFromFile(configFilePath string) (BumpConfig, error) {
+	log.WithField("configFile", configFilePath).Info("Loading config file")
+
 	cleanedConfigFilePath := filepath.Clean(configFilePath)
 
 	file, err := os.Open(cleanedConfigFilePath)
