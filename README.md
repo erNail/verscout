@@ -147,6 +147,7 @@ This is the default configuration used by `verscout`:
 ---
 bumps:
   majorPatterns:
+    - "^\w+(\(.*\))?!:"
     - "(?m)^BREAKING CHANGE:"
   minorPatterns:
     - "^feat(\\(.*\\))?:"

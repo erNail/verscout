@@ -25,6 +25,7 @@ type BumpConfig struct {
 var DefaultBumpConfig = BumpConfig{
 	Bumps: BumpPatterns{
 		MajorPatterns: []string{
+			`^\w+(\(.*\))?!:`,
 			`(?m)^BREAKING CHANGE:`,
 		},
 		MinorPatterns: []string{
