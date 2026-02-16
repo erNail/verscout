@@ -120,6 +120,78 @@ func TestCalculateNextVersion_BugFixNewFeatureAndBreakingChange(t *testing.T) {
 	assert.Equal(t, "2.0.0", nextVersion)
 }
 
+func TestCalculateNextVersion_NewFixAndBreakingChangeInType(t *testing.T) {
+	t.Parallel()
+
+	nextVersion, err := CalculateNextVersion(
+		"1.0.0",
+		[]string{"fix!: new feature"},
+		DefaultBumpConfig,
+	)
+	require.NoError(t, err)
+	assert.Equal(t, "2.0.0", nextVersion)
+}
+
+func TestCalculateNextVersion_NewFeatureAndBreakingChangeInType(t *testing.T) {
+	t.Parallel()
+
+	nextVersion, err := CalculateNextVersion(
+		"1.0.0",
+		[]string{"feat!: new feature"},
+		DefaultBumpConfig,
+	)
+	require.NoError(t, err)
+	assert.Equal(t, "2.0.0", nextVersion)
+}
+
+func TestCalculateNextVersion_NewFeatureWithScopeAndBreakingChangeInType(t *testing.T) {
+	t.Parallel()
+
+	nextVersion, err := CalculateNextVersion(
+		"1.0.0",
+		[]string{"feat(scope)!: new feature"},
+		DefaultBumpConfig,
+	)
+	require.NoError(t, err)
+	assert.Equal(t, "2.0.0", nextVersion)
+}
+
+func TestCalculateNextVersion_NewCustomTypeAndBreakingChangeInType(t *testing.T) {
+	t.Parallel()
+
+	nextVersion, err := CalculateNextVersion(
+		"1.0.0",
+		[]string{"custom!: new change"},
+		DefaultBumpConfig,
+	)
+	require.NoError(t, err)
+	assert.Equal(t, "2.0.0", nextVersion)
+}
+
+func TestCalculateNextVersion_NewRefactorChangeAndBreakingChangeInType(t *testing.T) {
+	t.Parallel()
+
+	nextVersion, err := CalculateNextVersion(
+		"1.0.0",
+		[]string{"refactor!: new change"},
+		DefaultBumpConfig,
+	)
+	require.NoError(t, err)
+	assert.Equal(t, "2.0.0", nextVersion)
+}
+
+func TestCalculateNextVersion_FixTypeWithOtherTypeReferencedInTitle(t *testing.T) {
+	t.Parallel()
+
+	nextVersion, err := CalculateNextVersion(
+		"1.0.0",
+		[]string{"fix: Add feat(scope)!: Some other message"},
+		DefaultBumpConfig,
+	)
+	require.NoError(t, err)
+	assert.Equal(t, "1.0.1", nextVersion)
+}
+
 func TestCalculateNextVersion_CustomConfig_BugFixAndBreakingChange(t *testing.T) {
 	t.Parallel()
 
