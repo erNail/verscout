@@ -93,8 +93,10 @@ verscout next
 For verscout to calculate the next version,
 [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) need to exist since the latest version tag.
 
-Using the default configuration, `fix:` will cause a `PATCH` bump, `feat:` will cause a `MINOR` bump,
-and `BREAKING CHANGE:` in the commit message body will cause a `MAJOR` bump.
+Using the default configuration, `fix:` will cause a `PATCH` bump.
+`feat:` will cause a `MINOR` bump.
+`BREAKING CHANGE:` in the commit message body or a `!` before the `:` (e.g. `feat!:`, `fix(scope)!:`)
+will cause a `MAJOR` bump.
 This behavior can be [configured](#custom-bump-configuration)
 
 If no version tags exist, the first version will be `1.0.0`
