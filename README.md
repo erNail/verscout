@@ -46,6 +46,12 @@ Most other tools known to me did not fulfill my requirements:
 brew install erNail/tap/verscout
 ```
 
+#### Via `mise`
+
+```shell
+mise use -g github:ernail/verscout
+```
+
 #### Via Binary
 
 Check the [releases](https://github.com/erNail/verscout/releases) for the available binaries.
@@ -206,48 +212,24 @@ to get an overview of the planned features.
 
 ## Development
 
-### Dependencies
+### Install Dependencies
 
-Please check the tasks in the [`taskfile.yaml`](./taskfile.yaml) for any tools you might need.
-
-### Testing
+All dependencies can be installed via `mise`.
 
 ```shell
-task test
+mise install
 ```
 
-### Linting
+If you are not using `mise`, check the [`mise.toml`](./mise.toml) for the required dependencies.
+
+### Run Tasks
 
 ```shell
-task lint
+# Find available tasks
+mise tasks
+
+# Run a task
+mise run <TASK_NAME>
 ```
 
-### Running
-
-```shell
-task run -- --help
-```
-
-### Building
-
-```shell
-task build
-```
-
-### Building Container Images
-
-```shell
-task build-image
-```
-
-### Test GitHub Actions
-
-```shell
-task test-github-actions
-```
-
-### Test Release
-
-```shell
-task release-test
-```
+If you are not using `mise`, check the [`mise.toml`](./mise.toml) for the commands.

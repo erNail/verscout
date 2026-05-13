@@ -1,0 +1,83 @@
+[tools]
+act = "0.2.88"
+actionlint = "1.7.12"
+git-cliff = "2.13.1"
+"github:ernail/verscout" = "2.0.1"
+go = "1.26.3"
+golangci-lint = "2.12.2"
+goreleaser = "2.15.4"
+ko = "0.18.1"
+markdownlint-cli2 = "0.22.1"
+pre-commit = "4.6.0"
+prettier = "3.8.3"
+tombi = "0.11.1"
+yamllint = "1.38.0"
+
+[tasks.lint]
+description = "Run linting and formatting"
+run = """
+  BEFORE=$(git diff)
+  yamllint .
+  prettier --write .
+  golangci-lint run ./... --fix
+  tombi format
+  tombi lint
+  markdownlint-cli2 **.md
+  actionlint
+  AFTER=$(git diff)
+  [ "$BEFORE" = "$AFTER" ] || exit 1
+"""
+
+[tasks.test]
+description = "Run tests"
+run = "go test ./... -tags=test"
+
+[tasks."test:version"]
+description = "Test if the version is correctly set via ldflags"
+run = """
+  VERSION="v1.2.3"
+  EXPECTED="verscout version $VERSION"
+  ACTUAL=$(go run -ldflags "-s -w -X github.com/erNail/verscout/cmd.version=$VERSION" main.go --version)
+  if [ "$EXPECTED" != "$ACTUAL" ]; then
+    echo "Version mismatch: expected $EXPECTED but got $ACTUAL"
+    exit 1
+  fi
+"""
+
+[tasks.build]
+description = "Build verscout binary"
+run = "go build -o dist/"
+
+[tasks."build:image"]
+description = "Build container image locally"
+run = "ko build --platform all --local"
+
+[tasks.run]
+description = "Run labdoc"
+run = "go run main.go"
+
+[tasks."run:latest"]
+description = "Run verscout latest"
+run = "go run main.go latest"
+
+[tasks."run:next"]
+description = "Run verscout next"
+run = "go run main.go next"
+
+[tasks."goreleaser:test"]
+description = "Test release with goreleaser"
+run = "goreleaser release --snapshot --clean"
+
+[tasks.act]
+description = "Test GitHub Actions locally"
+run = "act"
+
+[tasks."changelog:generate"]
+description = "Generate changelog with git-cliff"
+run = "git-cliff --unreleased --strip header"
+
+[tasks.pre-commit]
+description = "Run pre-commit tasks"
+run = [
+  { tasks = ["lint", "test", "test:version", "build", "run:next", "run:latest"] }
+]
