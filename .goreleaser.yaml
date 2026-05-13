@@ -19,8 +19,9 @@ builds:
 
 # Container Image build
 kos:
-  - repository: "ernail/verscout"
-    base_image: "alpine:3.21.2"
+  - repositories:
+      - "ernail/verscout"
+    base_image: "alpine"
     tags:
       - "{{ .Version }}"
       - "latest"
