@@ -15,6 +15,7 @@ linters:
     - "testpackage"
     - "cyclop"
     - "wsl"
+    - "gomodguard"
   settings:
     mnd:
       ignored-numbers:
