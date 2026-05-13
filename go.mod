@@ -1,6 +1,6 @@
 module github.com/erNail/verscout
 
-go 1.24.0
+go 1.26.3
 
 require (
 	github.com/go-git/go-billy/v5 v5.6.2

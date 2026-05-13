@@ -21,6 +21,8 @@ linters:
         - "0o644"
         - "0o755"
         - "42"
+    goconst:
+      ignore-tests: true
 formatters:
   enable:
     - "gci"
