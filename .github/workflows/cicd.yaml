@@ -5,39 +5,15 @@ name: "CI/CD"
   push:
 
 jobs:
-  pre-commit-job:
+  pre-commit:
     runs-on: "ubuntu-24.04"
     steps:
       - name: "Check out repository"
-        uses: "actions/checkout@v5.0.1"
-      - name: "Setup python"
-        uses: "actions/setup-python@v6.2.0"
-      - name: "Run pre-commit"
-        uses: "pre-commit/action@v3.0.1"
-
-  go-test-job:
-    runs-on: "ubuntu-24.04"
-    steps:
-      - name: "Check out repository"
-        uses: "actions/checkout@v5.0.1"
-      - name: "Setup go"
-        uses: "actions/setup-go@v6.2.0"
-        with:
-          go-version: "1.26.0"
-      - name: "Run go test"
-        run: "go test ./... -tags=test"
-
-  go-build-job:
-    runs-on: "ubuntu-24.04"
-    steps:
-      - name: "Check out repository"
-        uses: "actions/checkout@v5.0.1"
-      - name: "Setup go"
-        uses: "actions/setup-go@v6.2.0"
-        with:
-          go-version: "1.26.0"
-      - name: "Run go build"
-        run: "go build"
+        uses: "actions/checkout@v6.0.2"
+      - name: "Setup mise"
+        uses: "jdx/mise-action@v4.0.1"
+      - name: "Run linting, building, tests"
+        run: "mise run pre-commit"
 
   determine-version-job:
     runs-on: "ubuntu-24.04"
@@ -45,13 +21,11 @@ jobs:
       version: "${{ steps.get_version.outputs.version }}"
     steps:
       - name: "Check out repository"
-        uses: "actions/checkout@v5.0.1"
+        uses: "actions/checkout@v6.0.2"
         with:
           fetch-depth: 0
-      - name: "Setup go"
-        uses: "actions/setup-go@v6.2.0"
-        with:
-          go-version: "1.26.0"
+      - name: "Setup mise"
+        uses: "jdx/mise-action@v4.0.1"
       - name: "Run verscout next"
         id: "get_version"
         run: |
@@ -60,7 +34,7 @@ jobs:
             exit 0
           fi
           if [ "${{ github.ref_name }}" != "${{ github.event.repository.default_branch }}" ]; then
-            VERSION="${VERSION}-rc${{github.run_id}}"
+            VERSION="${VERSION}-rc"
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
@@ -73,32 +47,27 @@ jobs:
       contents: "write"
     steps:
       - name: "Check out repository"
-        uses: "actions/checkout@v5.0.1"
+        uses: "actions/checkout@v6.0.2"
         with:
           fetch-depth: 0
+      - name: "Setup mise"
+        uses: "jdx/mise-action@v4.0.1"
       - name: "Login to Docker Hub"
-        uses: "docker/login-action@v3.7.0"
+        uses: "docker/login-action@v4.1.0"
         with:
           username: "${{ secrets.DOCKER_USERNAME }}"
           password: "${{ secrets.DOCKER_VERSCOUT_GORELEASER_TOKEN }}"
-      - name: "Setup go"
-        uses: "actions/setup-go@v6.2.0"
-        with:
-          go-version: "1.26.0"
-      - name: "Setup goreleaser"
-        run: "go install github.com/goreleaser/goreleaser/v2@v2.12.5"
       - name: "Generate release notes"
-        uses: "orhun/git-cliff-action@v4.7.0"
-        with:
-          args: "--tag ${{ needs.determine-version-job.outputs.VERSION }} --unreleased --strip header"
-        env:
-          OUTPUT: "release-notes.md"
+        run: >-
+          mise run changelog:generate --
+          --tag ${{ needs.determine-version-job.outputs.VERSION }}
+          --output release-notes.md
       - name: "Create tag"
         run: "git tag ${{ needs.determine-version-job.outputs.VERSION }}"
       - name: "Run goreleaser"
         run: "goreleaser release --release-notes release-notes.md --clean"
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          DOCKER_LABDOC_GORELEASER_TOKEN: "${{ secrets.DOCKER_VERSCOUT_GORELEASER_TOKEN }}"
+          DOCKER_VERSCOUT_GORELEASER_TOKEN: "${{ secrets.DOCKER_VERSCOUT_GORELEASER_TOKEN }}"
           HOMEBREW_TAP_ERNAIL_GITHUB_TOKEN: "${{ secrets.HOMEBREW_TAP_ERNAIL_GITHUB_TOKEN }}"
 ...
