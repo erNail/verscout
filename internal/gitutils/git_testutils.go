@@ -73,6 +73,11 @@ func CreateTestCommit(repo *git.Repository, message, fileName, content string, t
 			Email: "author@test.com",
 			When:  time,
 		},
+		Committer: &object.Signature{
+			Name:  "Test Author",
+			Email: "author@test.com",
+			When:  time,
+		},
 	})
 	if err != nil {
 		return plumbing.ZeroHash, fmt.Errorf("failed to commit: %w", err)
