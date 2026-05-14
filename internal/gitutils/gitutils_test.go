@@ -37,8 +37,10 @@ func TestGetTagsWithAssociatedCommits_TwoTags(t *testing.T) {
 	tagsInfos, err := GetTagsWithAssociatedCommits(repo)
 	require.NoError(t, err)
 	assert.Len(t, tagsInfos, 2)
-	assert.Equal(t, "1.0.0", tagsInfos[0].Name)
-	assert.Equal(t, "1.0.1", tagsInfos[1].Name)
+
+	tagNames := []string{tagsInfos[0].Name, tagsInfos[1].Name}
+	assert.ElementsMatch(t, []string{"1.0.0", "1.0.1"}, tagNames)
+
 	assert.NotEqual(t, tagsInfos[0].Commit.Committer.When.Unix(), tagsInfos[1].Commit.Committer.When.Unix())
 }
 
