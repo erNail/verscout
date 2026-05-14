@@ -4,3 +4,4 @@ bin/
 git-cliff
 git-cliff-*
 release-notes.md
+.cache/
