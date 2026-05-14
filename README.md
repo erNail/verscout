@@ -88,7 +88,7 @@ verscout latest
 ```
 
 For verscout to find the latest version, the tags need to be in the format `vMAJOR.MINOR.PATCH`
-or `MAJOR.MINOR.PATCH`
+or `MAJOR.MINOR.PATCH`.
 
 #### Calculate the next version
 
@@ -103,10 +103,10 @@ Using the default configuration, `fix:` will cause a `PATCH` bump.
 `feat:` will cause a `MINOR` bump.
 `BREAKING CHANGE:` in the commit message body or a `!` before the `:` (e.g. `feat!:`, `fix(scope)!:`)
 will cause a `MAJOR` bump.
-This behavior can be [configured](#custom-bump-configuration)
+This behavior can be [configured](#custom-bump-configuration).
 
-If no version tags exist, the first version will be `1.0.0`
-This behavior can also be [configured](#custom-first-version)
+If no version tags exist, the first version will be `1.0.0`.
+This behavior can also be [configured](#custom-first-version).
 
 ### Configure `verscout`
 
@@ -148,7 +148,7 @@ verscout latest --exit-code 4
 
 ##### Custom Bump Configuration
 
-You can configure which conventional commit keywords cause which kind of bump in a `.verscout-config.yaml`
+You can configure which conventional commit keywords cause which kind of bump in a `.verscout-config.yaml`.
 This is the default configuration used by `verscout`:
 
 ```yaml
@@ -192,7 +192,7 @@ By default, `verscout next` will exit with code `0` if no next version is found 
 The expected reasons are:
 
 - There are no new commit messages since the last tag
-- There are no new commit message since the last tag that use any keywords that will cause a version bump
+- There are no new commit messages since the last tag that use any keywords that will cause a version bump
 
 You can change this behavior with the `--exit-code` flag
 
