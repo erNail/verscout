@@ -14,7 +14,7 @@ jobs:
       - name: "Check out repository"
         uses: "actions/checkout@v6.0.2"
       - name: "Cache mise tools"
-        uses: "actions/cache@v5.0.5"
+        uses: "actions/cache@v6.1.0"
         with:
           path: "${{ github.workspace }}/.cache/mise"
           key: "${{ hashFiles('mise.toml') }}"
@@ -33,7 +33,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: "Cache mise tools"
-        uses: "actions/cache@v5.0.5"
+        uses: "actions/cache@v6.1.0"
         with:
           path: "${{ github.workspace }}/.cache/mise"
           key: "${{ hashFiles('mise.toml') }}"
@@ -64,7 +64,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: "Cache mise tools"
-        uses: "actions/cache@v5.0.5"
+        uses: "actions/cache@v6.1.0"
         with:
           path: "${{ github.workspace }}/.cache/mise"
           key: "${{ hashFiles('mise.toml') }}"
