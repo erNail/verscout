@@ -12,7 +12,7 @@ jobs:
     runs-on: "ubuntu-24.04"
     steps:
       - name: "Check out repository"
-        uses: "actions/checkout@v6.0.2"
+        uses: "actions/checkout@v6.1.0"
       - name: "Cache mise tools"
         uses: "actions/cache@v5.0.5"
         with:
@@ -29,7 +29,7 @@ jobs:
       version: "${{ steps.get_version.outputs.version }}"
     steps:
       - name: "Check out repository"
-        uses: "actions/checkout@v6.0.2"
+        uses: "actions/checkout@v6.1.0"
         with:
           fetch-depth: 0
       - name: "Cache mise tools"
@@ -60,7 +60,7 @@ jobs:
       contents: "write"
     steps:
       - name: "Check out repository"
-        uses: "actions/checkout@v6.0.2"
+        uses: "actions/checkout@v6.1.0"
         with:
           fetch-depth: 0
       - name: "Cache mise tools"
